@@ -215,3 +215,14 @@ def test_agent_write_requires_current_version_and_owner(client):
     assert "Нет действующего" in response.json()["reply_text"]
     client.cookies.clear()
     assert client.delete(f"/api/v1/subscriptions/{subscriptions[0]['id']}").status_code == 404
+
+
+def test_web_subscription_survives_restart_without_configured_secret(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path / 'persistent.db'}")
+    monkeypatch.setenv("SEED_CONFIRMED_EVENTS", "0")
+    monkeypatch.delenv("SESSION_SECRET", raising=False)
+    with TestClient(app) as first:
+        assert first.post("/api/v1/subscriptions", json={"city": "Уфа"}).status_code == 200
+        cookies = dict(first.cookies)
+    with TestClient(app, cookies=cookies) as second:
+        assert [item["city"] for item in second.get("/api/v1/subscriptions").json()] == ["Уфа"]
