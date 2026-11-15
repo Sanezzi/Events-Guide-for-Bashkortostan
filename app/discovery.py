@@ -188,3 +188,15 @@ def llms(request: Request):
         f'- [Каталог]({base}/)\n- [Карта сайта]({base}/sitemap.xml)\n'
         f'- [Лента событий]({base}/rss.xml)\n- [Документация API]({base}/docs)\n'
     )
+
+
+@router.get('/{verification_file}.txt', response_class=PlainTextResponse)
+def indexnow_verification(verification_file: str):
+    key = indexnow_key()
+    if not public_origin() or not key or verification_file != key:
+        raise HTTPException(status_code=404, detail='Файл не найден')
+    return key
+
+
+def xml_response(root, media_type):
+    return Response(ET.tostring(root, encoding='utf-8', xml_declaration=True), media_type=media_type)
