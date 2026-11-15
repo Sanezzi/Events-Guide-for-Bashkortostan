@@ -101,3 +101,25 @@ class AgentRequest(StrictModel):
         description="Last at least five messages when available; fewer allowed for a new dialogue.")
     confirm_action: bool = False
     confirmation_version: Identifier | None = None
+
+
+class ToolCallTrace(StrictModel):
+    name: ShortText = "unknown"
+    args: dict[str, Any] = Field(default_factory=dict)
+    result_ids: list[UUID] = Field(default_factory=list)
+    duration_ms: NonNegativeFloat = 0.0
+    error: LongText | None = None
+
+
+class AgentTrace(StrictModel):
+    request: dict[str, Any] = Field(default_factory=dict)
+    plan: list[ShortText] = Field(default_factory=list)
+    tool_calls: list[ToolCallTrace] = Field(default_factory=list)
+    event_ids: list[UUID] = Field(default_factory=list)
+    latency_ms: NonNegativeFloat = 0.0
+    tokens_input: Annotated[int, Field(ge=0)] = 0
+    tokens_output: Annotated[int, Field(ge=0)] = 0
+    total_tokens: Annotated[int, Field(ge=0)] = 0
+    cost_usd: NonNegativeFloat = 0.0
+    cost_estimated: bool = True
+    fallback_reason: ShortText | None = None
