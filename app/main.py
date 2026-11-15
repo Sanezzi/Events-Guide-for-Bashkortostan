@@ -207,3 +207,22 @@ async def event_changes(since: datetime | None = None, limit: int = Query(20, ge
                 "changed_at": e.updated_at, **({"event": e} if e.status != "черновик" else {})}
                for e in sorted(rows, key=lambda e: (e.updated_at, e.id))]
     return {"changes": changes[offset:offset + limit], "total": len(changes), "limit": limit, "offset": offset}
+
+
+async def public_event(event_id):
+    card = await app.state.catalog.event(event_id)
+    if card is None:
+        raise HTTPException(404, "Событие не найдено")
+    return card
+
+
+@app.get("/api/v1/events/{event_id}", response_model=EventCard, tags=["events"])
+async def get_event(event_id: UUID):
+    return await public_event(event_id)
+
+
+@app.get("/api/v1/events/{event_id}/similar", response_model=list[EventCard], tags=["events"])
+async def similar_events(event_id: UUID, city: str | None = Query(None, max_length=150)):
+    card = await public_event(event_id)
+    rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs(city=city or card.city, category=card.category), page_size=6)
+    return [row for row in rows if row.id != event_id][:5]
