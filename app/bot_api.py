@@ -57,3 +57,16 @@ async def event(request: Request, event_id: UUID):
         if result is not None and result.is_demo:
             return None
         return result
+
+
+@router.post("/language")
+async def get_language(request: Request, body: BotUser):
+    async with request.app.state.database.sessions() as session:
+        return await SqlCatalogRepository(session).get_lang(body.user_id)
+
+
+@router.put("/language")
+async def set_language(request: Request, body: Language):
+    async with request.app.state.database.sessions() as session:
+        await SqlCatalogRepository(session).set_lang(body.user_id, body.lang)
+    return {"ok": True}
