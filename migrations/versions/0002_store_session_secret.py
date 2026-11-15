@@ -1,4 +1,4 @@
-"""Persist the default browser signing key across restarts."""
+__doc__ = 'Persist the default browser signing key across restarts.'
 from alembic import op
 import sqlalchemy as sa
 

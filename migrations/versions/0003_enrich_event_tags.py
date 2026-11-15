@@ -1,4 +1,4 @@
-"""Enrich existing catalog events with age and topic tags."""
+__doc__ = 'Enrich existing catalog events with age and topic tags.'
 from alembic import op
 import sqlalchemy as sa
 
@@ -24,5 +24,4 @@ def upgrade():
 
 
 def downgrade():
-    # The enriched tags are valid catalog data at the previous schema version.
     pass
