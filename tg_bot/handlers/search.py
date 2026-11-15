@@ -108,3 +108,59 @@ async def search_results(
         results_keyboard(lang, result.items, result.page, result.total, result.page_size),
         edit=edit,
     )
+
+
+async def render_event(target, event, lang, settings=None, *, screen="open-event", edit=False):
+    compact = screen == "agent-summary"
+    status = getattr(event, "status", "")
+    status = getattr(status, "value", status)
+    lines = []
+    if status in {"cancelled", "отменено"}:
+        lines.append(f"⚠️ <b>{html(t('bot.event_cancelled', lang))}</b>")
+    if getattr(event, "is_demo", False):
+        lines.append(html(t("bot.demo", lang)))
+    lines.append(f"🎟 <b>{html(event.title[:250])}</b>")
+    date = getattr(event, "date_start", None)
+    if date:
+        lines.append(f"📅 {html(display_date(date, settings))}")
+    ends = getattr(event, "date_end", None)
+    if ends and not compact:
+        lines.append("   ↳ " + html(display_date(ends, settings)))
+    city = getattr(event, "city", "")
+    venue = getattr(event, "venue", None) or getattr(event, "venue_name", None)
+    lines.append("📍 " + html(" · ".join(str(value)[:150] for value in (city, venue) if value)))
+    unknown = t("bot.unknown", lang)
+    price = getattr(event, "price_min", None)
+    upper = getattr(event, "price_max", None)
+    if getattr(event, "is_free", False):
+        price_text = t("bot.free", lang)
+    elif price is not None:
+        price_text = f"{price}–{upper}" if upper is not None and upper != price else str(price)
+        price_text += " ₽"
+    else:
+        price_text = unknown
+    age = getattr(event, "age_limit", None)
+    if age is None:
+        age = getattr(event, "age", None)
+    category = category_label(getattr(event, "category", "other"), lang)
+    age_text = f" · {age}+" if age is not None else ""
+    lines.append(f"💳 <b>{html(price_text)}</b>{age_text} · {html(category)}")
+    if not compact:
+        if event.address:
+            lines.append(html(event.address[:300]))
+        if event.language:
+            language_text = " / ".join(t(code, lang) for code in event.language.split("/"))
+            lines.append(f"{html(t('bot.event_language', lang))}: {html(language_text)}")
+        if event.description:
+            description = event.description.strip()
+            excerpt = description[:490] + "…" if len(description) > 490 else description
+            lines.extend(("", html(excerpt)))
+    back = {
+        "event": "results",
+        "agent-event": f"agent-summary:{event.id}",
+        "agent-summary": "agent",
+    }.get(screen, "menu")
+    keyboard = event_keyboard(lang, event, screen=screen, back=back)
+    if compact:
+        keyboard.inline_keyboard.insert(0, [button("bot.details", lang, f"agent-event:{event.id}")])
+    await respond(target, "\n".join(lines), keyboard, edit=edit)
