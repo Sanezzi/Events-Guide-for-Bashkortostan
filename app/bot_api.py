@@ -102,3 +102,15 @@ async def import_events(request: Request, filename: str, actor: str):
         if len(data) > ImporterService.MAX_BYTES:
             raise HTTPException(413, "Файл превышает 10 МиБ")
     return await request.app.state.catalog.import_file(bytes(data), filename, f"tg:{actor}")
+
+
+@router.post("/agent", response_model=AgentReply)
+async def ask(request: Request, body: Ask):
+    identity = bot_identity(body.user_id)
+    reply = await request.app.state.dialogues.ask(
+        identity, f"{identity}:{body.session_id}", body.message, body.confirmation_version,
+    )
+    pending = reply.requires_confirmation
+    return AgentReply(text=reply.reply_text, event_ids=[row.id for row in reply.events],
+                      is_fallback=reply.is_fallback,
+                      confirmation_version=pending["version"] if pending else None)
