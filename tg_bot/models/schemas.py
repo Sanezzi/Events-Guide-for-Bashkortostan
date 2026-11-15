@@ -133,3 +133,38 @@ class EventInput(BaseModel):
         if self.is_demo and "demo" not in self.title.casefold():
             raise ValueError("fictional demo title must be explicitly labelled DEMO")
         return self
+
+
+class EventOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    title: str
+    normalized_title: str
+    category: str
+    tags: list[str]
+    date_start: datetime
+    date_end: datetime | None
+    duration_min: int | None
+    city: str
+    venue: str
+    address: str
+    lat: Decimal | None
+    lon: Decimal | None
+    description: str
+    price_min: Decimal
+    price_max: Decimal
+    is_free: bool
+    age_limit: int
+    language: str | None
+    org_link: str | None
+    source_url: str
+    source_type: str
+    source_hash: str
+    sources: list[str]
+    verified_at: datetime | None
+    confidence: Decimal
+    status: str
+    dedup_key: str
+    is_demo: bool
+    created_at: datetime
+    updated_at: datetime
