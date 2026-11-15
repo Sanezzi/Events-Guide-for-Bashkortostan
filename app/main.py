@@ -367,3 +367,13 @@ async def agent_message(body: AgentRequest):
 @app.get("/agent/health", tags=["service"])
 def agent_health():
     return {"status": "ok", "mode": "llm" if app.state.agent.settings.api_key.strip() else "offline"}
+
+
+@app.get("/widget", response_class=HTMLResponse)
+def widget_page():
+    return FileResponse(FRONTEND / "widget.html")
+
+
+@app.get("/widget.js")
+def widget_js():
+    return FileResponse(FRONTEND / "widget.js", media_type="application/javascript")
