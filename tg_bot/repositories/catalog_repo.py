@@ -168,3 +168,28 @@ class SqlCatalogRepository:
             page_size=filters.page_size,
             explanation=explanation,
         )
+
+    async def get_event(self, event_id: UUID) -> EventOut | None:
+        row = await self.session.get(Event, event_id)
+        return (
+            EventOut.model_validate(row) if row is not None and row.status != "черновик" else None
+        )
+
+    async def stats(self, filters: SearchFilters | None = None) -> dict:
+        filters = filters or SearchFilters()
+        subquery = self._query(filters).order_by(None).subquery()
+        total = int(await self.session.scalar(select(func.count()).select_from(subquery)) or 0)
+        free = int(
+            await self.session.scalar(
+                select(func.count()).select_from(subquery).where(subquery.c.is_free.is_(True))
+            )
+            or 0
+        )
+        cities = list(
+            (
+                await self.session.scalars(
+                    select(subquery.c.city).distinct().order_by(subquery.c.city)
+                )
+            ).all()
+        )
+        return {"total": total, "free": free, "cities": cities}
