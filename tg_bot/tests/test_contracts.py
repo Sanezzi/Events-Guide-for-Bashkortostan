@@ -25,3 +25,12 @@ def test_locale_key_and_placeholder_parity():
             for dictionary in dictionaries
         ]
         assert all(fields == placeholders[0] for fields in placeholders), key
+
+
+def test_explicit_price_and_shared_identity_schema():
+    row = json.loads((Path(__file__).parents[1] / "data" / "sample_events.json").read_text(encoding="utf-8"))[0]
+    row.pop("price_min")
+    with pytest.raises(ValidationError):
+        EventInput.model_validate(row)
+    assert "tg_user_id" in UserSettings.__table__.c
+    assert "tg_user_id" in Subscription.__table__.c
