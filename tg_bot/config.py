@@ -52,3 +52,8 @@ class Settings(BaseSettings):
         if self.dev_mode and self.host not in ("127.0.0.1", "localhost", "::1"):
             raise ValueError("DEV_MODE requires a loopback HOST")
         return self
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
