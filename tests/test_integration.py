@@ -68,3 +68,37 @@ def test_organizer_proposals_require_moderation_and_resist_duplicates(client):
     assert client.patch(f"/api/v1/admin/events/{event_id}/status", headers=headers,
                         json={"status": "опубликовано"}).status_code == 200
     assert client.post("/api/v1/feedback", json={"event_id": event_id, "text": "Новое время"}).status_code == 200
+
+
+def test_venue_dictionary_and_combined_catalog_filters(client):
+    now = datetime.now(timezone.utc)
+    rows = [
+        dict(title=title, city=city, venue=venue, age_limit=age, category="концерт",
+             address="Адрес", description="Проверка", price_min=price,
+             date_start=(now + timedelta(days=days)).isoformat(),
+             status=status, source_url=f"https://example.invalid/{i}")
+        for i, (title, city, venue, age, price, days, status) in enumerate([
+            ("Концерт А", "Уфа", "Зал А", 6, 100, 2, "опубликовано"),
+            ("Концерт Б", "Уфа", "Зал А", 0, 200, 2, "опубликовано"),
+            ("Концерт В", "Уфа", "Зал Б", 12, 300, 3, "опубликовано"),
+            ("Концерт Г", "Стерлитамак", "Зал В", 0, 0, 2, "опубликовано"),
+            ("Концерт Д", "Уфа", "Архив", 0, 0, -2, "опубликовано"),
+            ("Концерт Е", "Уфа", "Черновик", 0, 0, 2, "черновик"),
+            ("Концерт Ж", "Уфа", "Отмена", 0, 0, 2, "отменено"),
+        ])
+    ]
+    result = client.post("/api/v1/admin/import", headers={"X-Admin-Token": "test-admin"},
+                         files={"file": ("events.json", json.dumps(rows))})
+    assert result.json()["added"] == 7
+    assert client.get("/api/v1/venues").json() == {"venues": ["Зал А", "Зал Б", "Зал В"]}
+    assert client.get("/api/v1/venues", params={"city": "уфа"}).json() == {"venues": ["Зал А", "Зал Б"]}
+    assert client.get("/api/v1/venues", params={"city": "Салават"}).json() == {"venues": []}
+    params = dict(city="Уфа", venue="Зал А", category="концерт", text="Концерт",
+                  age_limit=6, price_max=200, date_to=(now + timedelta(days=2, hours=1)).isoformat(),
+                  sort="price_max_desc", limit=1)
+    first = client.get("/api/v1/events", params=params).json()
+    second = client.get("/api/v1/events", params={**params, "offset": 1}).json()
+    assert first["total"] == second["total"] == 2
+    assert [first["events"][0]["title"], second["events"][0]["title"]] == ["Концерт Б", "Концерт А"]
+    free = client.get("/api/v1/events", params={"is_free": True}).json()["events"]
+    assert [row["title"] for row in free] == ["Концерт Г"]
