@@ -96,3 +96,19 @@ async def edit_event(request: Request, event_id: UUID, body: EventCard):
     if existing is None:
         raise HTTPException(404, "Событие не найдено")
     return await save(request, body.model_copy(update={"id": event_id}), existing=existing)
+
+
+@router.delete("/events/{event_id}")
+async def hide_event(request: Request, event_id: UUID):
+    row = await request.app.state.catalog.status(event_id, "отменено", "web-admin")
+    if row is None:
+        raise HTTPException(404, "Событие не найдено")
+    return {"deleted": str(event_id), "status": row.status}
+
+
+@router.patch("/events/{event_id}/status", response_model=EventCard)
+async def set_status(request: Request, event_id: UUID, body: StatusUpdate):
+    row = await request.app.state.catalog.status(event_id, body.status, "web-admin")
+    if row is None:
+        raise HTTPException(404, "Событие не найдено")
+    return row
