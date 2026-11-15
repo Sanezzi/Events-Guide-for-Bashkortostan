@@ -92,3 +92,67 @@ async def http_error(request, exc):
 async def invalid_request(request, exc):
     details = [{"field": ".".join(map(str, item["loc"])), "type": item["type"]} for item in exc.errors()]
     return error(422, "INVALID_REQUEST", "Проверьте параметры запроса.", details)
+
+
+def limited(request, group, limit):
+    buckets = request.app.state.limits
+    key = group, request.client.host if request.client else ""
+    hits = buckets.setdefault(key, deque())
+    buckets.move_to_end(key)
+    if len(buckets) > 4096:
+        buckets.popitem(last=False)
+    now = time.monotonic()
+    while hits and hits[0] <= now - 60:
+        hits.popleft()
+    if len(hits) >= limit:
+        return True
+    hits.append(now)
+    return False
+
+
+@app.middleware("http")
+async def observe(request, call_next):
+    identifier, start = uuid4().hex, time.monotonic()
+    request.state.request_id = identifier
+    path = request.url.path
+    public_read = request.method == "GET" and path.startswith("/api/v1/") and not path.startswith("/api/v1/admin")
+    try:
+        if path in {"/api/v1/feedback", "/api/v1/event-submissions"} and request.method == "POST" and limited(request, "feedback", 6):
+            response = error(429, "RATE_LIMITED", "Попробуйте через минуту.", headers={"Retry-After": "60"})
+        elif path in {"/api/chat", "/api/v1/subscriptions", "/agent/message"} and limited(request, "chat", 60):
+            response = error(429, "RATE_LIMITED", "Попробуйте через минуту.", headers={"Retry-After": "60"})
+        elif public_read and limited(request, "read", 180):
+            response = error(429, "RATE_LIMITED", "Попробуйте через минуту.", headers={"Retry-After": "60"})
+        else:
+            response = await call_next(request)
+    except Exception as exc:
+        LOG.error("request_failed request_id=%s error_type=%s", identifier, type(exc).__name__)
+        response = error(500, "INTERNAL_ERROR", "Сервис временно недоступен.")
+    response.headers["X-Request-Id"] = identifier
+    if public_read and response.status_code == 200 and not path.startswith("/api/v1/subscriptions"):
+        response.headers.setdefault("Cache-Control", "public, max-age=30")
+    if path.startswith(("/admin", "/internal/", "/agent/", "/api/v1/admin", "/api/chat", "/api/v1/subscriptions")):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex"
+    csp = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+           "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; object-src 'none'; base-uri 'self'")
+    if path != "/widget":
+        csp += "; frame-ancestors 'self'"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    if path not in {"/docs", "/redoc"}:
+        response.headers["Content-Security-Policy"] = csp
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000"
+    duration = (time.monotonic() - start) * 1000
+    metrics = request.app.state.metrics
+    metrics["requests"] += 1
+    metrics["errors"] += response.status_code >= 400
+    metrics["duration_ms_sum"] += duration
+    for bound in metrics["latency_le_ms"]:
+        metrics["latency_le_ms"][bound] += duration <= int(bound)
+    route = request.scope.get("route")
+    LOG.info("%s", json.dumps({"request_id": identifier, "route": getattr(route, "path", None),
+                              "method": request.method, "status": response.status_code, "duration_ms": round(duration, 2)}))
+    return response
