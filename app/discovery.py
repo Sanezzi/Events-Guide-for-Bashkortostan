@@ -167,3 +167,14 @@ def catalog_html(events):
         f'<div class="foot"><a class="btn" href="{event_path(event)}">Открыть</a></div></div></article>'
         for event in events
     )
+
+
+@router.get('/robots.txt', response_class=PlainTextResponse)
+def robots():
+    rules = ['User-agent: *', 'Allow: /', 'Disallow: /admin', 'Disallow: /api/v1/admin',
+             'Disallow: /agent/', 'Disallow: /api/chat', 'Disallow: /metrics', 'Disallow: /health',
+             'Disallow: /static/*.html$']
+    origin = public_origin()
+    if origin:
+        rules += ['', f'Sitemap: {origin}/sitemap.xml']
+    return '\n'.join(rules) + '\n'
