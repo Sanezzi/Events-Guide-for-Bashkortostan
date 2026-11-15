@@ -102,3 +102,20 @@ def test_venue_dictionary_and_combined_catalog_filters(client):
     assert [first["events"][0]["title"], second["events"][0]["title"]] == ["Концерт Б", "Концерт А"]
     free = client.get("/api/v1/events", params={"is_free": True}).json()["events"]
     assert [row["title"] for row in free] == ["Концерт Г"]
+
+
+def test_family_search_offers_alternative_cities_without_relaxing_age(client):
+    start = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    rows = [
+        dict(title="Спектакль", city=city, age_limit=age, category="спектакль",
+             venue="Зал", address="Адрес", description="Событие",
+             price_min=100, date_start=start, source_url=f"https://example.invalid/{i}")
+        for i, (city, age) in enumerate([("Стерлитамак", 16), ("Уфа", 6), ("Бирск", 12)])
+    ]
+    uploaded = client.post("/api/v1/admin/import", headers={"X-Admin-Token": "test-admin"},
+                           files={"file": ("events.json", json.dumps(rows))})
+    assert uploaded.json()["added"] == 3
+    result = client.post("/api/chat", json={"session_id": "family",
+        "message": "Привет, куда сходить в Стерлитамаке с ребёнком 6 лет?"}).json()
+    assert "в других городах" in result["reply_text"]
+    assert [(e["city"], e["age_limit"]) for e in result["events"]] == [("Уфа", 6)]
