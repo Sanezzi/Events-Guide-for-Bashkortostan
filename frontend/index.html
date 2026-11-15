@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- metadata -->
+<template data-afisha-slot="metadata"></template>
 <link rel="stylesheet" href="/static/styles.css">
 <style>
 .page-home .coat{display:flex;justify-content:center;margin:6px 0 4px;animation:coat-in 1s ease-out both}
@@ -43,7 +43,7 @@
 <div class="actions"><button class="btn" type="submit">Применить фильтры</button><button class="btn ghost" type="button" id="reset-filters">Сбросить</button></div>
 </form>
 <p id="result-meta" class="meta" aria-live="polite">Загрузка афиши…</p>
-<div id="catalog" class="grid" aria-live="polite"><!-- catalog --></div>
+<div id="catalog" class="grid" aria-live="polite"><template data-afisha-slot="catalog"></template></div>
 <p id="empty" class="empty" hidden></p><button type="button" id="more-events" class="btn ghost" hidden>Показать ещё</button>
 
 

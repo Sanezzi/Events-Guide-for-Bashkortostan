@@ -388,7 +388,7 @@ async def index(request: Request):
     if not request.query_params:
         rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs())
         cards = discovery.catalog_html(rows)
-    return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- catalog -->", cards, 1))
+    return HTMLResponse(html.replace('<template data-afisha-slot="metadata"></template>', meta, 1).replace('<template data-afisha-slot="catalog"></template>', cards, 1))
 
 
 @app.get("/event", response_class=HTMLResponse)
@@ -400,7 +400,7 @@ async def event_page(request: Request, id: UUID | None = None):
     meta = discovery.metadata(title, event.description[:160] if event else discovery.DESCRIPTION, canonical,
                               noindex=not event, structured=discovery.event_schema(event, canonical) if event else None)
     detail = discovery.detail_html(event) if event else "Выберите событие в каталоге."
-    return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- event -->", detail, 1))
+    return HTMLResponse(html.replace('<template data-afisha-slot="metadata"></template>', meta, 1).replace('<template data-afisha-slot="event"></template>', detail, 1))
 
 
 @app.get("/chat")

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- metadata -->
+<template data-afisha-slot="metadata"></template>
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="page-event">
 <header class="topbar"><div class="wrap topbar-in"><a class="logo" href="/">Афиша <span>Башкортостана</span></a><nav><a href="/">Каталог</a><a href="/chat">Чат-агент</a><a href="/subscribe">Подписка</a><a href="/about">О сервисе</a><a href="/admin">Модерация</a><a href="/docs">API · Swagger</a></nav></div></header>
 <main class="wrap">
 <p style="margin-top:18px"><a href="/">← Вернуться в каталог</a></p>
-<div id="root" class="detail"><!-- event --></div>
+<div id="root" class="detail"><template data-afisha-slot="event"></template></div>
 <p class="meta landmark-caption" lang="ba">Шихандар — Башҡортостандың символдары.</p>
 <section><h2>Похожие события</h2><div id="similar" class="grid"></div><p id="similar-empty" class="meta" hidden>Похожих событий в базе пока нет.</p></section>
 <section class="detail" id="feedback-box" hidden><h2 style="margin-top:0">Обращение организатору</h2><p class="meta">Заявка или уточнение по этому событию. Текст отправляется через API сервиса.</p><form id="feedback-form"><label for="feedback-text" style="font-weight:700">Текст обращения</label><textarea id="feedback-text" required maxlength="4000" rows="4" style="width:100%;margin:8px 0;padding:10px;border:1px solid #e6ddd0;border-radius:10px;font-size:15px"></textarea><button class="btn" type="submit">Отправить</button> <span id="feedback-result" class="meta" aria-live="polite"></span></form></section>
