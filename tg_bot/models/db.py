@@ -109,3 +109,25 @@ class Event(Base):
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    __table_args__ = (UniqueConstraint("tg_user_id", "filter_key", name="unique_subscription"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tg_user_id: Mapped[str] = mapped_column(String(128), index=True)
+    user_id = synonym("tg_user_id")
+    city: Mapped[str | None] = mapped_column(String(150))
+    category: Mapped[str | None] = mapped_column(String(30))
+    filter_key: Mapped[str] = mapped_column(String(64))
+    period: Mapped[str] = mapped_column(String(10), default="weekly")
+    delivered_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class UserSettings(Base):
+    __tablename__ = "user_settings"
+    __table_args__ = (CheckConstraint("lang IN ('ru','ba','en')", name="valid_ui_language"),)
+    tg_user_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    user_id = synonym("tg_user_id")
+    lang: Mapped[str] = mapped_column(String(5), default="ru")
