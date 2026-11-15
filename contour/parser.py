@@ -41,3 +41,17 @@ def ddg_links(query, limit=10):
         if len(out) >= limit:
             break
     return out
+
+def parse_age(text):
+    m = re.search(r'(?<!\d)(0|6|12|16|18)\s*\+', text or '')
+    return int(m.group(1)) if m else None
+
+def parse_prices(text):
+    t = fold(text or '')
+    if re.search(r'бесплатн|вход свободный|свободный вход', t):
+        return (0.0, 0.0, True)
+    nums = [float(x.replace(' ', '').replace(',', '.')) for x in re.findall(r'(\d[\d ]{1,7})\s*(?:₽|руб)', text or '')]
+    nums = [n for n in nums if 0 < n <= 100000]
+    if not nums:
+        return None  # unknown price: caller must NOT write 0 RUB
+    return (min(nums), max(nums), False)
