@@ -66,3 +66,30 @@ async def respond(
             raise
         await asyncio.sleep(exc.retry_after)
         await message.answer(text, reply_markup=reply_markup, **kwargs)
+
+
+async def send_long(target: Message | CallbackQuery, text: str, reply_markup=None) -> None:
+    # Split raw text BEFORE escaping so HTML entities/tags cannot be truncated.
+    chunks = []
+    remaining = text
+    while remaining:
+        # Respect both escaped payload size and Telegram UTF-16 text limits.
+        low, high = 1, min(len(remaining), 3900)
+        while low < high:
+            middle = (low + high + 1) // 2
+            prefix = remaining[:middle]
+            if len(html(prefix)) <= 3900 and len(prefix.encode("utf-16-le")) // 2 <= 3900:
+                low = middle
+            else:
+                high = middle - 1
+        size = low
+        if size < len(remaining):
+            boundary = remaining.rfind("\n", 0, size)
+            if boundary > size // 2:
+                size = boundary + 1
+        chunks.append(remaining[:size])
+        remaining = remaining[size:]
+    for index, chunk in enumerate(chunks or [""]):
+        await respond(
+            target, html(chunk), reply_markup=reply_markup if index == len(chunks) - 1 else None
+        )
