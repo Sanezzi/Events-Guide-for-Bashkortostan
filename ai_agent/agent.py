@@ -250,3 +250,47 @@ class CultureAgentService:
                     run.trace.plan.append("offer_catalog_alternatives")
                     return self._finish(run, state, cards, text=f"Точного совпадения нет. {note}")
         return self._finish(run, state, text=await self._empty_explanation(run, state))
+
+    async def _empty_explanation(self, run: _Run, state: _Session) -> str:
+        c = state.constraints
+        candidates = [e for e in run.records.values() if dialogue.eligible(e, c, run.now)]
+        if c.route and candidates:
+            from itertools import combinations
+            pairs = [pair for pair in combinations(sorted(candidates, key=lambda e: e.date_start), 2)
+                     if pair[0].date_end is not None and pair[1].date_end is not None
+                     and pair[0].date_start.date() == pair[1].date_start.date()
+                     and pair[0].date_end + timedelta(minutes=self.settings.transfer_buffer_min) <= pair[1].date_start]
+            budget_pairs = [pair for pair in pairs if c.span_min is None or
+                            (pair[1].date_end - pair[0].date_start).total_seconds() <= c.span_min * 60]
+            if c.budget is not None and budget_pairs:
+                minimum = min(sum(e.price_max for e in pair) * c.party for pair in budget_pairs)
+                if minimum > c.budget:
+                    return f"Маршрут из двух событий не укладывается в бюджет {c.budget:g} ₽. Среди проверенных вариантов нужно минимум {minimum:g} ₽ на {c.party} чел.; можно увеличить бюджет на {minimum - c.budget:g} ₽."
+            span_pairs = [pair for pair in pairs if c.budget is None or sum(e.price_max for e in pair) * c.party <= c.budget]
+            if c.span_min is not None and span_pairs:
+                minimum = min((b.date_end - a.date_start).total_seconds() / 60 for a, b in span_pairs)
+                if minimum > c.span_min:
+                    return f"Для двух событий нужен интервал минимум {minimum:g} мин. среди проверенных вариантов; увеличьте длительность на {minimum - c.span_min:g} мин."
+        # Prove a blocking filter with a counterfactual tool query; never blame a
+        # single filter merely because an intersection happened to be empty.
+        for key, label in (("budget", "бюджет"), ("text", "название/ключевые слова"),
+                           ("category", "категория"), ("is_free", "только бесплатный вход"),
+                           ("end_hour", "время окончания"), ("duration_max", "длительность")):
+            if len(run.trace.tool_calls) >= 5:
+                break
+            if getattr(c, key) is None:
+                continue
+            relaxed = replace(c, **{key: None})
+            await self._execute(run, "search_events", relaxed.query())
+            fitting = [e for e in run.records.values() if dialogue.eligible(e, relaxed, run.now)]
+            if not fitting:
+                continue
+            if c.route and not dialogue.make_route(fitting, relaxed, self.settings.transfer_buffer_min):
+                continue
+            if key == "budget" and not c.route:
+                minimum = min(e.price_max * c.party for e in fitting)
+                return f"Мешает бюджет {c.budget:g} ₽: среди проверенных вариантов нужно минимум {minimum:g} ₽ на {c.party} чел. Можно увеличить бюджет на {max(0, minimum - c.budget):g} ₽."
+            return f"По всем условиям вариантов нет. Если ослабить ограничение «{label}», проверенные варианты появляются. Разрешить такое изменение?"
+        if c.route:
+            return "По выбранным городу, датам, времени и бюджету маршрут из 2–4 непересекающихся событий не найден. Можно выбрать один пункт вместо двух или другой день; подходящие события не выдумываю."
+        return "Подходящих событий нет по сочетанию выбранных города, даты, возраста, цены и ключевых слов. Не удалось установить одно мешающее ограничение; попробуйте другую дату или более широкий запрос."
