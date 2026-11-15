@@ -311,3 +311,19 @@ class CultureAgentService:
             logger.warning("Culture agent fallback failed: %s", type(exc).__name__)
             run.trace.fallback_reason = (reason + ";repository_" + type(exc).__name__)[:300]
             return self._finish(run, state, text="Сейчас не удалось проверить афишу. Попробуйте ещё раз позже.")
+
+    def _propose(self, run: _Run, state: _Session, name: str, args: BaseModel) -> AgentResponse:
+        now = run.now
+        pending = {"tool": name, "arguments": args.model_dump(mode="json"),
+                   "session_id": run.request.session_id, "user_id": run.request.user_id,
+                   "expires_at": (now + timedelta(seconds=self.settings.confirmation_ttl_seconds)).isoformat(),
+                   "expires_in_seconds": self.settings.confirmation_ttl_seconds,
+                   "version": token_urlsafe(18)}
+        state.pending = json.loads(json.dumps(pending))
+        run.trace.tool_calls.append(ToolCallTrace(name=name, args=args.model_dump(mode="json"),
+                                                  error="confirmation_required"))
+        if name == "subscribe":
+            summary = f"Подписка: город {args.city}, категория {args.category or 'любая'}, период {args.period}."
+        else:
+            summary = f"Обращение по событию {args.event_id}: {args.text}"
+        return self._finish(run, state, text=summary + " Подтвердите действие перед сохранением.", pending=dict(pending))
