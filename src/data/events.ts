@@ -72,3 +72,15 @@ export function cover(event: EventCard) {
   const seed = Array.from(event.id).reduce((hash, char) => Math.imul(hash, 31) + char.charCodeAt(0) | 0, 0)
   return art(options[(seed >>> 0) % options.length])
 }
+
+export function safeUrl(value?: string | null) {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null
+  } catch { return null }
+}
+
+export function matchesLanguage(event: EventCard, language?: string) {
+  return !language || event.language?.split('/').includes(language) === true
+}
