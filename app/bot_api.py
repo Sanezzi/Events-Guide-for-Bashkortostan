@@ -114,3 +114,26 @@ async def ask(request: Request, body: Ask):
     return AgentReply(text=reply.reply_text, event_ids=[row.id for row in reply.events],
                       is_fallback=reply.is_fallback,
                       confirmation_version=pending["version"] if pending else None)
+
+
+@router.get("/notifications")
+async def notifications(request: Request):
+    now = datetime.now(timezone.utc)
+    interval = {"daily": 1, "weekly": 7, "monthly": 30}
+    output = []
+    async with request.app.state.database.sessions() as session:
+        subscriptions = await session.scalars(select(Subscription).where(Subscription.user_id.like("tg:%")))
+        for sub in subscriptions:
+            since = sub.delivered_at or sub.created_at
+            if now < since + timedelta(days=interval[sub.period]):
+                continue
+            query = SqlCatalogRepository(session)._query(SearchFilters(
+                city=sub.city, category=sub.category,
+            )).where(Event.created_at > since, Event.created_at <= now, Event.is_demo.is_(False)).limit(5)
+            events = list(await session.scalars(query))
+            if events:
+                output.append({"id": sub.id, "user_id": sub.user_id.removeprefix("tg:"),
+                               "through": now, "events": [{"id": row.id, "title": row.title} for row in events]})
+            if len(output) == 50:
+                break
+    return output
