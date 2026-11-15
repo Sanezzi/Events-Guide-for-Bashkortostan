@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang='ru'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Админ-панель — Афиша культуры Башкортостана</title>
+<link rel='stylesheet' href='/static/styles.css'>
+<style>.audit-output{white-space:pre-wrap;overflow-wrap:anywhere}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.cards div{background:#fff;border:1px solid #e6ddd0;border-radius:12px;padding:14px}.cards b{font-size:26px;display:block}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{padding:9px 12px;border:1px solid #0f5a3c;border-radius:10px;background:#fff;color:#0f5a3c;cursor:pointer}.tabs button.on{background:#0f5a3c;color:#fff}table{width:100%;border-collapse:collapse;background:#fff}td,th{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top;font-size:14px}.sev{font-weight:800;padding:2px 8px;border-radius:999px}.sev.critical{background:#fbd5d5}.sev.high{background:#ffe3c2}.sev.medium{background:#fff3c4}.sev.low{background:#eaf4ec}.ok{color:#0f5a3c;font-weight:700}.bad{color:#9b2c2c;font-weight:700}@media(max-width:700px){.cards{grid-template-columns:1fr 1fr}}</style>
+</head>
+<body class="page-admin">
+<header class='topbar'><div class='wrap topbar-in'><a class='logo' href='/'>Афиша <span>Башкортостана</span></a><nav><a href='/'>Каталог</a><a href='/chat'>Чат-агент</a><a href='/subscribe'>Подписка</a><a href='/about'>О сервисе</a><a href='/admin' aria-current='page'>Админ</a><a href='/docs'>API · Swagger</a></nav></div></header>
+<main class='wrap'>
+<section class='hero'><h1>Админ-панель</h1><p>События, подписки, обращения, трассы агента и журнал изменений. Доступ — по токену из ADMIN_TOKEN.</p></section>
+<div class='detail' id='login-box'><h2 style='margin-top:0'>Вход</h2><p class='meta'>Доступ — по токену из ADMIN_TOKEN. Введите токен ниже.</p><form id='login-form' class='chat-form' style='margin-top:0'><input id='token' type='password' placeholder='X-Admin-Token' autocomplete='off'><button class='btn' type='submit'>Войти</button></form><p id='login-error' class='meta'></p></div>
+<div id='panel' hidden>
+<div class='cards' id='overview'></div>
+<p class='meta' id='health-line'></p>
+<div class='tabs' id='tabs'><button data-tab='events' class='on' type='button'>События</button><button data-tab='subs' type='button'>Подписки</button><button data-tab='feedback' type='button'>Обращения</button><button data-tab='journal' type='button'>Журнал</button><button data-tab='traces' type='button'>Трассы</button></div>
+<section id='tab-events'><h2>События</h2><form id='import-form' class='chat-form'><label>Импорт CSV или JSON<input id='import-file' type='file' accept='.csv,.json' required></label><button class='btn' type='submit'>Загрузить</button></form><pre id='import-result' class='audit-output' aria-live='polite'></pre><label>Статус<select id='status-filter'><option value=''>Все</option><option>черновик</option><option>опубликовано</option><option>отменено</option></select></label><div id='events-list' style='overflow:auto'></div><h3 id='form-title'>Новое событие</h3><form id='create-form' class='filters' style='grid-template-columns:1fr 1fr'><label>Название<input id='f-title' required></label><label>Город<input id='f-city' required></label><label>Категория<select id='f-category'><option>концерт</option><option>спектакль</option><option>выставка</option><option>фестиваль</option><option>кино</option><option>экскурсия</option><option>другое</option></select></label><label>Начало<input id='f-start' type='datetime-local' required></label><label>Площадка<input id='f-venue' required></label><label>Адрес<input id='f-address' required></label><label>Цена от<input id='f-pmin' type='number' min='0' required></label><label>Цена до<input id='f-pmax' type='number' min='0' required></label><label>Возраст<select id='f-age' required><option value=''>Выберите</option><option>0</option><option>6</option><option>12</option><option>16</option><option>18</option></select></label><label>Источник<input id='f-source' type='url' required></label><label>Билеты или организатор<input id='f-tickets' type='url'></label><label>Описание<textarea id='f-description' required></textarea></label><div class='actions'><button class='btn' type='submit'>Сохранить</button><button id='new-event' class='btn ghost' type='button' hidden>Новая карточка</button><span id='create-result' class='meta'></span></div></form></section>
+<section id='tab-subs' hidden><h2>Подписки</h2><div id='subs-list'></div></section>
+<section id='tab-feedback' hidden><h2>Обращения организатору</h2><div id='feedback-list'></div></section>
+<section id='tab-journal' hidden><h2>Журнал изменений</h2><pre id='journal' class='audit-output'></pre></section>
+<section id='tab-traces' hidden><h2>Трасса ответа агента</h2><form id='trace-form' class='chat-form' style='margin-top:0'><label>Трасса<select id='trace-session' required></select></label><button class='btn' type='submit'>Показать</button></form><pre id='trace-out' style='background:#f6f1e7;border:1px solid #e6ddd0;border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap'>Выберите один из последних ответов агента.</pre></section>
+<p><button class='btn ghost' type='button' id='logout'>Выйти</button></p>
+</div>
+</main>
+<footer><div class='wrap'><p><strong>Афиша культуры Башкортостана</strong> — демонстрационный сервис.</p></div></footer>
+<script src="/static/admin.js"></script>
+</body>
+</html>
