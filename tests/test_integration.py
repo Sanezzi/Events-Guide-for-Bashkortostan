@@ -306,3 +306,22 @@ async def test_aiogram_to_catalog_over_http(tmp_path, monkeypatch):
     finally:
         await backend.close()
         await bot.session.close()
+
+
+def test_public_install_seeds_only_published_events_once(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path / 'starter.db'}")
+    monkeypatch.setenv("SEED_CONFIRMED_EVENTS", "1")
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin")
+    monkeypatch.setenv("LLM_API_KEY", "")
+    headers = {"X-Admin-Token": "test-admin"}
+    with TestClient(app) as installed:
+        events = installed.get("/api/v1/admin/events", headers=headers).json()
+        assert events
+        assert {event["status"] for event in events} == {"опубликовано"}
+        event_id = events[0]["id"]
+        assert installed.patch(f"/api/v1/admin/events/{event_id}/status", headers=headers,
+                               json={"status": "отменено"}).status_code == 200
+    with TestClient(app) as restarted:
+        current = restarted.get("/api/v1/admin/events", headers=headers).json()
+        assert len(current) == len(events)
+        assert next(event for event in current if event["id"] == event_id)["status"] == "отменено"
