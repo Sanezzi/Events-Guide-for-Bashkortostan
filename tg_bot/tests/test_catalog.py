@@ -1,5 +1,3 @@
-"""Real SQLite integration tests for persistence, import and application fallback."""
-
 import asyncio
 import csv
 import io

@@ -1,5 +1,3 @@
-"""Cross-layer contracts that must remain stable when merging this package."""
-
 import json
 from pathlib import Path
 from string import Formatter

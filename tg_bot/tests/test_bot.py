@@ -1,5 +1,3 @@
-"""Real dispatcher + database integration, with Telegram transport fully mocked."""
-
 from datetime import datetime, timezone
 from typing import Any
 
