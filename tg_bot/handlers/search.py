@@ -255,3 +255,18 @@ def create_router() -> Router:
     async def assistant(query: CallbackQuery, state: FSMContext, database):
         await answer_callback(query)
         await show_assistant(query, state, database, edit=True)
+
+    @router.message(Command("search", "catalog"))
+    async def catalog_command(
+        message: Message, state: FSMContext, database, agent=None, settings=None
+    ):
+        await state.set_state(None)
+        await state.update_data(filters={}, history=[])
+        await search_results(message, state, database, agent, settings=settings)
+
+    @router.callback_query(F.data == "catalog")
+    async def catalog(query: CallbackQuery, state: FSMContext, database, agent=None, settings=None):
+        await answer_callback(query)
+        await state.set_state(None)
+        await state.update_data(filters={}, history=[])
+        await search_results(query, state, database, agent, edit=True, settings=settings)
