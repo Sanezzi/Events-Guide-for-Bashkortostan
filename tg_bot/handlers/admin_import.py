@@ -72,3 +72,61 @@ def create_router() -> Router:
             return
         await state.set_state(ImportFlow.document)
         await respond(message, html(t("bot.import_prompt", lang)), back_keyboard(lang))
+
+    @router.message(F.document)
+    async def import_document(message: Message, state: FSMContext, database, settings):
+        lang = await language(database, message.from_user.id)
+        if message.from_user.id not in settings.admin_ids:
+            await respond(message, html(t("bot.import_denied", lang)), back_keyboard(lang))
+            return
+        document = message.document
+        filename = PurePath(document.file_name or "").name
+        if PurePath(filename).suffix.lower() not in {".csv", ".json"}:
+            await respond(message, html(t("bot.import_file_type", lang)), back_keyboard(lang))
+            return
+        if document.file_size is not None and document.file_size > MAX_IMPORT_BYTES:
+            await respond(message, html(t("bot.import_too_large", lang)), back_keyboard(lang))
+            return
+        buffer = LimitedBuffer()
+        try:
+            await message.bot.download(document.file_id, destination=buffer, timeout=30)
+            data = buffer.getvalue()
+        except ValueError:
+            await respond(message, html(t("bot.import_too_large", lang)), back_keyboard(lang))
+            return
+        finally:
+            buffer.close()
+        if isinstance(database, BackendClient):
+            report = await database.import_bytes(data, filename, actor=str(message.from_user.id))
+        else:
+            async with database.sessions() as session:
+                report = await ImporterService(session).import_bytes(
+                    data, filename, actor=f"telegram:{message.from_user.id}"
+                )
+        await state.set_state(None)
+        await respond(
+            message,
+            html(
+                t(
+                    "bot.import_report",
+                    lang,
+                    added=report.added,
+                    updated=report.updated,
+                    rejected=report.rejected,
+                    unchanged=report.unchanged,
+                )
+            ),
+            back_keyboard(lang),
+        )
+        if report.errors:
+            # Row validation details are useful to the authorized admin, never logged.
+            details = "\n".join(
+                t(
+                    "bot.import_row_error",
+                    lang,
+                    row=error.get("row", "?"),
+                    reason=import_reason(error, lang),
+                )
+                for error in report.errors[:20]
+            )
+            await send_long(message, t("bot.import_errors", lang) + "\n" + details, back_keyboard(lang))
