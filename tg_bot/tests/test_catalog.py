@@ -225,3 +225,35 @@ async def test_unique_source_hash_and_dedup_database_constraints(database, chang
                 session.add(Event(**duplicate))
                 await session.flush()
         assert await session.scalar(select(func.count()).select_from(Event)) == 1
+
+
+@pytest.mark.asyncio
+async def test_agent_timeout_errors_and_unknown_ids_fall_back(database):
+    class Slow:
+        async def ask(self, **kwargs):
+            await asyncio.Event().wait()
+
+    class Broken:
+        async def ask(self, **kwargs):
+            raise RuntimeError("bridge unavailable")
+
+    class Unknown:
+        async def ask(self, **kwargs):
+            return AgentReply(text="bad", event_ids=[uuid4()])
+
+    async with database.sessions() as session:
+        repo = SqlCatalogRepository(session)
+        await load(session, [event_row()])
+        for agent in (None, Slow(), Broken(), Unknown()):
+            service = BotService(repo, agent, timeout=0.01)
+            assert await service.ask("1", "s", "концерт", []) is None
+            assert (await service.search(SearchFilters())).total == 1
+
+        class Good:
+            async def ask(self, **kwargs):
+                assert kwargs["history"] == ["1", "2", "3", "4", "5"]
+                return AgentReply(text="Уточните город", clarification="Какой город?")
+
+        assert (
+            await BotService(repo, Good()).ask("1", "s", "x", ["1", "2", "3", "4", "5"])
+        ).clarification == "Какой город?"
