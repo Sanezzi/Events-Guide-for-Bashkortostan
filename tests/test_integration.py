@@ -226,3 +226,83 @@ def test_web_subscription_survives_restart_without_configured_secret(tmp_path, m
         cookies = dict(first.cookies)
     with TestClient(app, cookies=cookies) as second:
         assert [item["city"] for item in second.get("/api/v1/subscriptions").json()] == ["Уфа"]
+
+
+@pytest.mark.asyncio
+async def test_aiogram_to_catalog_over_http(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path / 'bot-web.db'}")
+    monkeypatch.setenv("SEED_CONFIRMED_EVENTS", "0")
+    monkeypatch.setenv("INTERNAL_API_TOKEN", "test-bot")
+    monkeypatch.setenv("LLM_API_KEY", "")
+    telegram = CaptureSession()
+    bot = Bot("123456:offline-test-token", session=telegram,
+              default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    backend = BackendClient("http://test", "test-bot")
+    await backend.close()
+    backend.client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test",
+                                       headers={"X-Internal-Token": "test-bot"})
+    dispatcher = Dispatcher(database=backend, agent=backend, settings=Settings(_env_file=None))
+    dispatcher.include_router(create_router())
+    try:
+        async with app.router.lifespan_context(app):
+            event = dict(title="Проверочный концерт", category="концерт", city="Уфа",
+                         venue="Зал", address="Тестовый адрес", description="Проверка источника",
+                         date_start=(datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
+                         price_min=100, source_url="https://organizer.example/test",
+                         org_link="https://organizer.example/test")
+            report = await app.state.catalog.import_file(json.dumps([event]).encode(), "test.json", "test")
+            assert report.added == 1
+
+            def callbacks(method):
+                return [button.callback_data for row in method.reply_markup.inline_keyboard for button in row]
+
+            async def send(update_id, text):
+                await dispatcher.feed_update(bot, Update(update_id=update_id, message=Message(
+                    message_id=update_id, date=datetime.now(timezone.utc), chat=Chat(id=42, type="private"),
+                    from_user=User(id=42, is_bot=False, first_name="Test"), text=text,
+                )))
+                return telegram.calls[-1]
+
+            async def click(update_id, data):
+                await dispatcher.feed_update(bot, Update.model_validate({
+                    "update_id": update_id,
+                    "callback_query": {
+                        "id": str(update_id), "chat_instance": "test", "data": data,
+                        "from": {"id": 42, "is_bot": False, "first_name": "Test"},
+                        "message": {
+                            "message_id": 2, "date": int(datetime.now().timestamp()),
+                            "chat": {"id": 42, "type": "private"}, "text": "Карточка",
+                        },
+                    },
+                }))
+                return telegram.calls[-1]
+
+            menu = await send(1, "/start")
+            assert "agent" in callbacks(menu)
+            assistant = await click(2, "agent")
+            assert "ИИ-помощник" in assistant.text and "menu" in callbacks(assistant)
+            card = await send(3, "Концерт в Уфе")
+            assert any("резервном режиме" in (getattr(call, "text", None) or "") for call in telegram.calls)
+            assert "<b>Проверочный концерт</b>" in card.text
+            assert "📅" in card.text and "100" in card.text
+            assert [button.url for row in card.reply_markup.inline_keyboard for button in row if button.url] == [
+                "https://organizer.example/test"
+            ]
+            detail = next(data for data in callbacks(card) if data and data.startswith("agent-event:"))
+            assert "agent" in callbacks(card)
+
+            details = await click(4, detail)
+            assert "Тестовый адрес" in details.text
+            subscribe = next(data for data in callbacks(details) if data and data.startswith("subscribe:"))
+            assert callbacks(await click(5, subscribe)) == [detail]
+            details = await click(6, detail)
+            back = next(data for data in callbacks(details) if data and data.startswith("agent-summary:"))
+            summary = await click(7, back)
+            assert "Тестовый адрес" not in summary.text
+            assert detail in callbacks(summary)
+            assert "menu" in callbacks(await click(8, "agent"))
+            assert "agent" in callbacks(await click(9, "menu"))
+            assert "ИИ-помощник" in (await send(10, "/ai")).text
+    finally:
+        await backend.close()
+        await bot.session.close()
