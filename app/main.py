@@ -75,3 +75,20 @@ app.add_middleware(CORSMiddleware,
 app.include_router(admin_router)
 app.include_router(bot_router)
 app.include_router(discovery.router)
+
+
+def error(status, code, message, details=None, headers=None):
+    return JSONResponse({"code": code, "message": message, "details": details}, status_code=status, headers=headers)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error(request, exc):
+    if isinstance(exc.detail, dict):
+        return JSONResponse(exc.detail, status_code=exc.status_code, headers=exc.headers)
+    return error(exc.status_code, f"HTTP_{exc.status_code}", str(exc.detail), headers=exc.headers)
+
+
+@app.exception_handler(RequestValidationError)
+async def invalid_request(request, exc):
+    details = [{"field": ".".join(map(str, item["loc"])), "type": item["type"]} for item in exc.errors()]
+    return error(422, "INVALID_REQUEST", "Проверьте параметры запроса.", details)
