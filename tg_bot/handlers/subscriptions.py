@@ -69,3 +69,30 @@ def create_router() -> Router:
         except ValueError:
             return
         await show_subscriptions(query, database, edit=True, page=page)
+
+    @router.callback_query(F.data.startswith("subscribe:"))
+    async def subscribe(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        lang = await language(database, query.from_user.id)
+        argument = query.data.split(":", 1)[1]
+        screen, separator, identifier = argument.partition(":")
+        back = "results"
+        async with repository(database) as repo:
+            if argument == "filters":
+                data = await state.get_data()
+                values = data.get("filters", {})
+                city, category = values.get("city"), values.get("category")
+            else:
+                try:
+                    event = await repo.get_event(UUID(identifier if separator else argument))
+                except ValueError:
+                    event = None
+                if event is None:
+                    await respond(query, html(t("bot.not_found", lang)), back_keyboard(lang, back), edit=True)
+                    return
+                if not separator or screen not in {"event", "open-event", "agent-event", "agent-summary"}:
+                    screen = "event"
+                back = f"{screen}:{event.id}"
+                city, category = event.city, event.category
+            await repo.subscribe(str(query.from_user.id), city, category)
+        await respond(query, html(t("bot.subscribed", lang)), back_keyboard(lang, back), edit=True)
