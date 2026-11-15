@@ -166,3 +166,16 @@ class FindSimilarArgs(DateRangeArgs):
 
 class VenueScheduleArgs(DateRangeArgs):
     venue: ShortText
+
+
+class SubscribeArgs(StrictModel):
+    user_id: Identifier
+    city: ShortText
+    category: Category | None = None
+    period: Literal["daily", "weekly", "monthly"] = "weekly"
+
+
+class FeedbackArgs(StrictModel):
+    user_id: Identifier
+    event_id: UUID
+    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
