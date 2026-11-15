@@ -122,3 +122,23 @@ def create_router() -> Router:
             await show_event(message, database, event_id, settings)
             return
         await show_menu(message, database)
+
+    @router.message(Command("help"))
+    async def help_command(message: Message, database):
+        lang = await language(database, message.from_user.id)
+        await respond(message, html(t("bot.help", lang)), back_keyboard(lang))
+
+    @router.message(Command("cancel"))
+    async def cancel(message: Message, state: FSMContext, database):
+        await state.clear()
+        lang = await language(database, message.from_user.id)
+        await respond(
+            message, html(t("bot.cancelled", lang)), back_keyboard(lang)
+        )
+
+    @router.callback_query(F.data == "menu")
+    async def menu(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        await state.set_state(None)
+        await state.update_data(agent_confirmation=None)
+        await show_menu(query, database, edit=True)
