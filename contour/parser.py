@@ -55,3 +55,28 @@ def parse_prices(text):
     if not nums:
         return None  # unknown price: caller must NOT write 0 RUB
     return (min(nums), max(nums), False)
+
+def parse_datetime(text, year=None):
+    m = re.search(r'(\d{1,2})\s+(' + '|'.join(MONTHS) + r')(?:\s+(\d{4}))?[^0-9]{0,20}?(\d{1,2}):(\d{2})', fold(text or ''), re.I)
+    if not m:
+        return None
+    try:
+        return datetime(int(m.group(3) or year or datetime.now(TZ).year),
+                        MONTHS[m.group(2)], int(m.group(1)), int(m.group(4)), int(m.group(5)), tzinfo=TZ)
+    except ValueError:
+        return None
+
+def parse_duration(text):
+    m = re.search(r'(\d+)\s*ч(?:\.|ас)?\s*(\d{1,2})?\s*мин', fold(text or ''))
+    if m:
+        return int(m.group(1)) * 60 + int(m.group(2) or 0)
+    m = re.search(r'длительность[^0-9]{0,10}(\d+)\s*мин', fold(text or ''))
+    return int(m.group(1)) if m else None
+
+def slugify(s):
+    s = fold(s)
+    s = re.sub(r'[^0-9a-zа-я]+', '-', s).strip('-')
+    return s[:60] or 'event'
+
+def deterministic_id(source_url, title, dt):
+    return str(uuid5(NAMESPACE_URL, source_url + '|' + fold(title) + '|' + dt.isoformat()))
