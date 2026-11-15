@@ -73,3 +73,38 @@ def display_date(value, settings=None) -> str:
         zone = ZoneInfo(getattr(settings, "timezone", "Asia/Yekaterinburg"))
         return value.astimezone(zone).strftime("%d.%m.%Y %H:%M %Z")
     return str(value)
+
+
+async def search_results(
+    target, state: FSMContext, database, agent=None, *, edit=False, settings=None
+):
+    lang = await language(database, target.from_user.id)
+    data = await state.get_data()
+    values = data.get("filters", {})
+    filters = SearchFilters(**values)
+    async with repository(database) as repo:
+        result = await BotService(repo, agent).search(filters)
+    # A stale page can become empty after catalog updates.
+    if not result.items and result.total and filters.page > 1:
+        values = {
+            **values,
+            "page": max(1, (result.total + filters.page_size - 1) // filters.page_size),
+        }
+        await state.update_data(filters=values)
+        return await search_results(target, state, database, agent, edit=edit, settings=settings)
+    pages = max(1, (result.total + result.page_size - 1) // result.page_size)
+    text = t("bot.results", lang, total=result.total, page=result.page, pages=pages)
+    text += "\n" + filter_summary(values, lang)
+    if not result.items:
+        text += "\n\n" + t("empty_" + (result.explanation or "combined"), lang)
+    for index, event in enumerate(result.items, 1):
+        date = getattr(event, "date_start", None)
+        date_text = display_date(date, settings)
+        demo = t("bot.demo", lang) + "\n" if getattr(event, "is_demo", False) else ""
+        text += f"\n\n{index}. {demo}{str(event.title)[:180]}\n{event.city} · {date_text}"
+    await respond(
+        target,
+        html(text),
+        results_keyboard(lang, result.items, result.page, result.total, result.page_size),
+        edit=edit,
+    )
