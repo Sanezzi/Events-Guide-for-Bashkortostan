@@ -139,3 +139,12 @@ async def test_cancelled_and_drafts_visibility_pagination_and_stats(database):
         assert await repo.get_event(uuid4()) is None
         assert await repo.stats() == {"total": 2, "free": 2, "cities": ["Уфа"]}
         assert (await repo.search(SearchFilters(age=5))).total == 0
+
+
+@pytest.mark.asyncio
+async def test_timezone_date_boundary(database):
+    async with database.sessions() as session:
+        await load(session, [event_row(date_start="2099-11-16T00:30:00+05:00", date_end=None)])
+        repo = SqlCatalogRepository(session)
+        assert (await repo.search(SearchFilters(date="2099-11-16"))).total == 1
+        assert (await repo.search(SearchFilters(date="2099-11-15"))).total == 0
