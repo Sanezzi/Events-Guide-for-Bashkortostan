@@ -112,3 +112,18 @@ async def set_status(request: Request, event_id: UUID, body: StatusUpdate):
     if row is None:
         raise HTTPException(404, "Событие не найдено")
     return row
+
+
+@router.get("/journal")
+async def journal(request: Request):
+    async with request.app.state.database.sessions() as session:
+        rows = await session.scalars(select(AuditLog).order_by(AuditLog.id.desc()).limit(100))
+        return [{"action": row.action, "actor": row.actor, "event_id": row.event_id,
+                 "details": row.details, "created_at": row.created_at} for row in rows]
+
+
+@router.get("/subscriptions")
+async def admin_subscriptions(request: Request):
+    async with request.app.state.database.sessions() as session:
+        rows = await session.scalars(select(Subscription).order_by(Subscription.id.desc()).limit(100))
+        return [{"id": row.id, "city": row.city, "category": row.category, "period": row.period} for row in rows]
