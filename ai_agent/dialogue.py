@@ -237,3 +237,30 @@ def eligible(e: EventCard, c: Constraints, now: datetime) -> bool:
         if end.date() != start.date() or (end.hour, end.minute) > (c.end_hour, c.end_minute):
             return False
     return True
+
+
+def make_route(events: list[EventCard], c: Constraints, buffer_min: int) -> list[EventCard]:
+    """Bounded exhaustive search over the first 40 events, optimizing length then cost.
+
+    Buffer is an explicit planning assumption, never a travel-time estimate.
+    """
+    from itertools import combinations
+    events = sorted(events, key=lambda e: (e.date_start, str(e.id)))[:40]
+    best: list[EventCard] = []
+    best_cost = float("inf")
+    for size in range(2, 5):
+        for route in combinations(events, size):
+            if any(e.date_end is None for e in route):
+                continue
+            if any(a.date_end + timedelta(minutes=buffer_min) > b.date_start for a, b in zip(route, route[1:])):
+                continue
+            if route[0].date_start.date() != route[-1].date_start.date():
+                continue
+            cost = sum(e.price_max * c.party for e in route)
+            if c.budget is not None and cost > c.budget:
+                continue
+            if c.span_min is not None and (route[-1].date_end - route[0].date_start).total_seconds() > c.span_min * 60:
+                continue
+            if size > len(best) or size == len(best) and cost < best_cost:
+                best, best_cost = list(route), cost
+    return best
