@@ -1,0 +1,115 @@
+"""Catalog operations shared by the bot, agent and web application."""
+
+from __future__ import annotations
+
+from datetime import datetime, time, timedelta
+from typing import Protocol, runtime_checkable
+from uuid import UUID
+from zoneinfo import ZoneInfo
+
+from sqlalchemy import String, cast, delete, func, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from tg_bot.config import get_settings
+from tg_bot.models import Event, Subscription, UserSettings
+from tg_bot.models.schemas import EventOut, SearchFilters, SearchResult, digest, normalize
+
+
+@runtime_checkable
+class CatalogRepositoryProtocol(Protocol):
+    async def search(self, filters: SearchFilters) -> SearchResult: ...
+    async def get_event(self, event_id: UUID) -> EventOut | None: ...
+    async def stats(self, filters: SearchFilters | None = None) -> dict: ...
+    async def get_lang(self, user_id: str) -> str: ...
+    async def set_lang(self, user_id: str, lang: str) -> None: ...
+    async def subscribe(
+        self, user_id: str, city: str | None = None, category: str | None = None
+    ) -> Subscription: ...
+    async def list_subscriptions(self, user_id: str) -> list[Subscription]: ...
+    async def unsubscribe(self, user_id: str, subscription_id: int | None = None) -> int: ...
+
+
+class SqlCatalogRepository:
+    def __init__(self, session: AsyncSession, timezone_name: str | None = None):
+        self.session = session
+        self.timezone = ZoneInfo(timezone_name or get_settings().timezone)
+
+    def _query(self, filters: SearchFilters):
+        stmt = select(Event).where(Event.status == "опубликовано")
+        if not filters.include_demo:
+            stmt = stmt.where(Event.is_demo.is_(False))
+        now = datetime.now(self.timezone)
+        start = end = None
+        if filters.date is not None:
+            start = filters.date
+            end = start + timedelta(days=1)
+        elif filters.period:
+            start = now.date()
+            if filters.period == "tomorrow":
+                start += timedelta(days=1)
+            elif filters.period == "weekend":
+                start += timedelta(days=(5 - start.weekday()) % 7 if start.weekday() < 5 else 0)
+            end = start + timedelta(
+                days=7
+                if filters.period == "week"
+                else (7 - start.weekday() if filters.period == "weekend" else 1)
+            )
+        if start is not None:
+            lower = datetime.combine(start, time.min, self.timezone)
+            upper = datetime.combine(end, time.min, self.timezone)
+            stmt = stmt.where(
+                func.coalesce(Event.date_end, Event.date_start) >= lower, Event.date_start < upper
+            )
+        else:
+            stmt = stmt.where(func.coalesce(Event.date_end, Event.date_start) >= now)
+        if filters.category:
+            stmt = stmt.where(Event.category == filters.category)
+        if filters.max_price is not None:
+            price = Event.price_max if filters.full_price else Event.price_min
+            stmt = stmt.where(price <= filters.max_price)
+        if filters.is_free is not None:
+            stmt = stmt.where(Event.is_free == filters.is_free)
+        if filters.language:
+            stmt = stmt.where(
+                Event.language.in_([filters.language, "ru/ba"])
+                if filters.language in {"ru", "ba"}
+                else Event.language == filters.language
+            )
+        if filters.age is not None:
+            stmt = stmt.where(Event.age_limit <= filters.age)
+        if filters.city:
+            stmt = stmt.where(self._normalized(Event.city) == normalize(filters.city))
+        if filters.venue:
+            stmt = stmt.where(self._normalized(Event.venue) == normalize(filters.venue))
+        if filters.date_from is not None:
+            stmt = stmt.where(Event.date_start >= filters.date_from)
+        if filters.date_to is not None:
+            stmt = stmt.where(Event.date_start <= filters.date_to)
+        if filters.duration_max is not None:
+            stmt = stmt.where(Event.duration_min <= filters.duration_max)
+        if filters.q:
+            searchable = (
+                Event.title
+                + " "
+                + Event.description
+                + " "
+                + Event.city
+                + " "
+                + Event.venue
+                + " "
+                + Event.category
+                + " "
+                + cast(Event.tags, String)
+            )
+            expression = self._normalized(searchable)
+            for term in normalize(filters.q).split():
+                stmt = stmt.where(expression.contains(term, autoescape=True))
+        sort_column = {
+            "date_start": Event.date_start,
+            "price_min": Event.price_min,
+            "price_max": Event.price_max,
+            "price_max_desc": Event.price_max.desc(),
+            "title": Event.normalized_title,
+        }[filters.sort]
+        return stmt.order_by(sort_column, Event.date_start, Event.id)
