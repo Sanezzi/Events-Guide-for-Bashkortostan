@@ -1,8 +1,3 @@
-"""Validated contracts for the culture agent (Pydantic v2).
-
-Strict Python inputs use UUID/datetime objects; JSON transports should call
-model_validate_json, which parses their JSON string representations safely.
-"""
 from __future__ import annotations
 
 from typing import Annotated, Any, Literal, Self
@@ -67,7 +62,6 @@ class EventCard(StrictModel):
     @field_validator("age_limit", mode="before")
     @classmethod
     def integer_age(cls, value: Any) -> Any:
-        # Literal integer matching otherwise also accepts False and 0.0.
         if type(value) is not int:
             raise ValueError("age_limit must be an integer age rating")
         return value
@@ -93,7 +87,6 @@ class Message(StrictModel):
 
 
 class AgentRequest(StrictModel):
-    """Callers send at least the last five turns when available; cold starts are valid."""
     session_id: Identifier
     user_id: Identifier
     message: LongText

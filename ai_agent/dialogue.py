@@ -1,4 +1,3 @@
-"""Conservative Russian filter parser used independently of the LLM."""
 from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from calendar import monthrange
@@ -90,7 +89,6 @@ def parse(message: str, old: Constraints, now: datetime, previous: list[EventCar
     for root, city in CITIES.items():
         if re.search(r"(?<![а-я])" + root, s):
             c.city = city
-    # A named unsupported city must produce no data, never another city silently.
     named_city = re.search(r"(?:^|\s)в\s+([А-ЯЁ][а-яё-]{2,})", message)
     if named_city and not any(root in named_city[1].lower() for root in CITIES):
         c.city = named_city[1]
@@ -240,10 +238,6 @@ def eligible(e: EventCard, c: Constraints, now: datetime) -> bool:
 
 
 def make_route(events: list[EventCard], c: Constraints, buffer_min: int) -> list[EventCard]:
-    """Bounded exhaustive search over the first 40 events, optimizing length then cost.
-
-    Buffer is an explicit planning assumption, never a travel-time estimate.
-    """
     from itertools import combinations
     events = sorted(events, key=lambda e: (e.date_start, str(e.id)))[:40]
     best: list[EventCard] = []

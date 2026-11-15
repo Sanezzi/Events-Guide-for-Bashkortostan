@@ -1,4 +1,3 @@
-"""Optional FastAPI integration; the application owns service construction."""
 from __future__ import annotations
 
 try:
@@ -15,11 +14,6 @@ router = APIRouter(prefix="/agent", tags=["culture-agent"])
 
 
 def get_service(request: Request) -> CultureAgentService:
-    """Override this dependency or set app.state.ai_agent_service at startup.
-
-    The host must derive/validate request.user_id from its authenticated principal;
-    this standalone router deliberately does not invent an authentication system.
-    """
     service = getattr(request.app.state, "ai_agent_service", None)
     if service is None:
         raise HTTPException(status_code=503, detail="Culture agent service is not configured")

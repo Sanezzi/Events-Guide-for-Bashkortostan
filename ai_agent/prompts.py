@@ -1,4 +1,3 @@
-"""Versioned instructions for extracting search filters and choosing tools."""
 from datetime import datetime
 
 PROMPT_VERSION = "culture-agent/1.1"

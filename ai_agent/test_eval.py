@@ -1,8 +1,3 @@
-"""Offline executable controls: python -m ai_agent.test_eval [--report PATH].
-
-Uses the real OpenAI SDK with an HTTP mock, never a provider or an environment key.
-The fixed service clock is a test-only patch, not a production clock API.
-"""
 from __future__ import annotations
 
 import argparse
@@ -22,6 +17,8 @@ from zoneinfo import ZoneInfo
 import httpx
 from openai import AsyncOpenAI
 
+CLI_DESCRIPTION = 'Offline executable controls: python -m ai_agent.test_eval [--report PATH].'
+
 from .agent import CultureAgentService
 from .config import AgentSettings
 from .schemas import AgentRequest, AgentResponse
@@ -39,7 +36,6 @@ class FrozenDatetime(datetime):
 
 
 def check(condition: bool, explanation: str) -> None:
-    # Unlike assert, these checks remain active under python -O.
     if not condition:
         raise AssertionError(explanation)
 
@@ -57,7 +53,6 @@ def final(*ids: UUID) -> dict:
 
 
 class ScriptedProvider:
-    """A real SDK client with an in-process HTTP transport and strict script."""
     def __init__(self, steps: list[dict | int | str]):
         self.steps = list(steps)
         self.requests: list[dict] = []
@@ -334,7 +329,7 @@ async def evaluate(include_adversarial: bool = False) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=CLI_DESCRIPTION)
     parser.add_argument("--report", type=Path, help="Optional JSON output; default prints only and writes no files")
     parser.add_argument("--adversarial", action="store_true", help="Add separate provider/error/limit cases")
     args = parser.parse_args()

@@ -1,8 +1,3 @@
-"""Bounded asynchronous orchestration with repository-grounded answers.
-
-Ledgers and confirmation state are process-local. Multi-worker deployments should
-replace them with a shared transactional store before offering durable quotas.
-"""
 from __future__ import annotations
 
 import asyncio
@@ -56,7 +51,6 @@ class _Run:
 
 
 class CultureAgentService:
-    """An injectable async service; constructing it never performs network I/O."""
 
     def __init__(self, repository: EventRepository, settings: AgentSettings | None = None,
                  client: AsyncOpenAI | None = None,
@@ -95,7 +89,6 @@ class CultureAgentService:
             ledger.popleft()
 
     async def _reserve(self, run: _Run, messages: list[dict], tool_defs: list) -> tuple[list, list]:
-        # UTF-8 bytes bound text token count conservatively; include protocol overhead.
         input_bound = len(json.dumps([messages, tool_defs], ensure_ascii=False).encode("utf-8")) + 1024
         amount = (input_bound * self.settings.input_usd_per_million +
                   self.settings.max_output_tokens * self.settings.output_usd_per_million) / 1_000_000
@@ -116,7 +109,6 @@ class CultureAgentService:
             return first, second
 
     async def _completion(self, run: _Run, messages: list[dict]) -> Any:
-        # A blank key disables even an injected client, making offline mode explicit.
         if not self.settings.api_key.strip():
             raise ValueError("api_key_missing")
         definitions = TOOLS
@@ -132,7 +124,6 @@ class CultureAgentService:
                 tool_choice="auto",
                 max_tokens=self.settings.max_output_tokens), timeout=self.settings.timeout_seconds)
         except Exception:
-            # Unknown provider usage after a timeout is charged at the reserved bound.
             run.trace.cost_usd += reservations[0][1]
             raise
         usage = getattr(response, "usage", None)
@@ -165,7 +156,6 @@ class CultureAgentService:
             for card in cards:
                 if not isinstance(card, EventCard):
                     raise TypeError("repository returned an unvalidated event")
-                # Drafts never enter prompts, explanatory text, or recommendation state.
                 if card.status != "черновик":
                     run.records[card.id] = card
                     trace.result_ids.append(card.id)
@@ -271,8 +261,6 @@ class CultureAgentService:
                 minimum = min((b.date_end - a.date_start).total_seconds() / 60 for a, b in span_pairs)
                 if minimum > c.span_min:
                     return f"Для двух событий нужен интервал минимум {minimum:g} мин. среди проверенных вариантов; увеличьте длительность на {minimum - c.span_min:g} мин."
-        # Prove a blocking filter with a counterfactual tool query; never blame a
-        # single filter merely because an intersection happened to be empty.
         for key, label in (("budget", "бюджет"), ("text", "название/ключевые слова"),
                            ("category", "категория"), ("is_free", "только бесплатный вход"),
                            ("end_hour", "время окончания"), ("duration_max", "длительность")):
@@ -417,7 +405,6 @@ class CultureAgentService:
         now = datetime.now(self._timezone)
         run = _Run(request, now, AgentTrace(request=request.model_dump(mode="json")))
         key = (request.session_id, request.user_id)
-        # Evict idle dialogue state and empty rolling ledgers opportunistically.
         clock = time.monotonic()
         for old_key, old in list(self._sessions.items()):
             if clock - old.touched > _WINDOW and not old.lock.locked() and not old.active:
@@ -453,7 +440,6 @@ class CultureAgentService:
                         return self._finish(run, state, text="Нет действующего действия для подтверждения. Повторите запрос.")
                     if request.confirmation_version is not None and request.confirmation_version != pending["version"]:
                         return self._finish(run, state, text="Предложение изменилось. Проверьте последнее действие.")
-                    # Consume before I/O: a timeout must never replay a possibly completed write.
                     state.pending = None
                     args = TOOL_MODELS[pending["tool"]].model_validate_json(json.dumps(pending["arguments"]))
                     result = await self._execute(run, pending["tool"], args)

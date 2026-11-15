@@ -1,9 +1,3 @@
-"""Tool descriptions and replaceable repositories; mock data is explicitly synthetic.
-
-Descriptions and search text are inert data. No repository operation interprets
-instructions from an event or user text. Mutating tools require confirmation in
-the calling agent; these repositories are deliberately unaware of dialogue state.
-"""
 from __future__ import annotations
 
 from datetime import datetime, time, timedelta
@@ -33,8 +27,6 @@ _TOOL_DESCRIPTIONS = {
     "subscribe": "Сохранить подписку. Вызывать только после явного подтверждения пользователя.",
     "save_feedback": "Сохранить обращение. Вызывать только после явного подтверждения пользователя.",
 }
-# Standard OpenAI Chat Completions function definitions. Pydantic remains the
-# validation authority; do not claim OpenAI strict=true with optional properties.
 TOOLS = [
     {"type": "function", "function": {
         "name": name, "description": _TOOL_DESCRIPTIONS[name],
@@ -54,7 +46,6 @@ class EventRepositoryProtocol(Protocol):
     async def save_feedback(self, query: FeedbackArgs) -> ActionResult: ...
 
 
-# Backward-compatible short name; integrations should use EventRepositoryProtocol.
 EventRepository = EventRepositoryProtocol
 
 
@@ -70,12 +61,6 @@ def _tokens(text: str) -> list[str]:
 
 
 def make_demo_events(now: datetime | None = None) -> list[EventCard]:
-    """24 synthetic cards, anchored on the next Saturday on/after tomorrow.
-
-    Passing an aware clock makes dates reproducible. UUIDs identify stable demo
-    slots and deliberately do not depend on the clock or Python's hash seed.
-    The example.invalid links are labels, never claims of verified real sources.
-    """
     tz = ZoneInfo("Asia/Yekaterinburg")
     clock = now if now is not None else datetime.now(tz)
     if clock.tzinfo is None or clock.utcoffset() is None:
@@ -83,7 +68,6 @@ def make_demo_events(now: datetime | None = None) -> list[EventCard]:
     clock = clock.astimezone(tz)
     tomorrow = clock.date() + timedelta(days=1)
     saturday = tomorrow + timedelta(days=(5 - tomorrow.weekday()) % 7)
-    # title, category, hour, minutes, low/high price, age, day offset, status
     slots = [
         ("Семейная выставка", "выставка", 10, 60, 0.0, 0.0, 0, 0, "опубликовано"),
         ("Детский спектакль", "спектакль", 12, 60, 150.0, 200.0, 6, 0, "опубликовано"),
@@ -132,11 +116,6 @@ def make_demo_events(now: datetime | None = None) -> list[EventCard]:
 
 
 class MockEventRepository:
-    """In-memory demo repository; public events/subscriptions/feedback are inspectable.
-
-    Returned cards and stored action arguments are deep copies. Public fixture
-    editing is intentional; callers should mutate events only for test setup.
-    """
     def __init__(self, now: datetime | None = None, events: Iterable[EventCard] | None = None) -> None:
         self.events: list[EventCard] = [event.model_copy(deep=True) for event in (
             make_demo_events(now) if events is None else events
@@ -173,8 +152,6 @@ class MockEventRepository:
                 event.title, event.normalized_title, event.description, event.city,
                 event.venue, event.category, *event.tags,
             ]))
-            # AND across meaningful tokens, substring per token. No evaluation,
-            # tool dispatch, instruction recognition or constraint overrides.
             if query.text and (not tokens or not all(token in haystack for token in tokens)):
                 continue
             matches.append(event)
@@ -214,7 +191,6 @@ class MockEventRepository:
 
 
 class ApiOrDbRepositoryStub:
-    """Integration seam: implement against an approved official JSON API or DB."""
     async def search_events(self, query: SearchEventsArgs) -> SearchResult:
         raise NotImplementedError("TODO: parameterized API/DB search; published-only, date, upper-price and age filters.")
 

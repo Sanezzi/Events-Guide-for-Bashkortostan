@@ -1,4 +1,3 @@
-"""Explicit settings; no dotenv loading, clients or network calls at import time."""
 import os
 from pydantic import BaseModel, ConfigDict, Field
 from zoneinfo import ZoneInfo

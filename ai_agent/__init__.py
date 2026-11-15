@@ -1,4 +1,3 @@
-"""Culture agent public API. No clients, network calls or environment mutation at import."""
 from .agent import CultureAgentService
 from .config import AgentSettings
 from .schemas import (ActionResult, AgentRequest, AgentResponse, AgentTrace,
