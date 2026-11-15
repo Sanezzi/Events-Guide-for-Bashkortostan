@@ -203,3 +203,46 @@ class SqlCatalogRepository:
             raise ValueError("unsupported language")
         await self.session.merge(UserSettings(user_id=str(user_id), lang=lang))
         await self.session.commit()
+
+    async def subscribe(
+        self, user_id: str, city: str | None = None, category: str | None = None,
+        period: str = "weekly",
+    ) -> Subscription:
+        filters = SearchFilters(city=city, category=category)
+        key = digest([normalize(filters.city or ""), filters.category or "", period])
+        stmt = select(Subscription).where(
+            Subscription.user_id == str(user_id), Subscription.filter_key == key
+        )
+        existing = await self.session.scalar(stmt)
+        if existing is not None:
+            return existing
+        subscription = Subscription(
+            user_id=str(user_id),
+            city=filters.city or None,
+            category=filters.category,
+            filter_key=key,
+            period=period,
+        )
+        try:
+            async with self.session.begin_nested():
+                self.session.add(subscription)
+                await self.session.flush()
+        except IntegrityError:
+            existing = await self.session.scalar(stmt)
+            if existing is None:
+                raise
+            await self.session.commit()
+            return existing
+        await self.session.commit()
+        return subscription
+
+    async def list_subscriptions(self, user_id: str) -> list[Subscription]:
+        return list(
+            (
+                await self.session.scalars(
+                    select(Subscription)
+                    .where(Subscription.user_id == str(user_id))
+                    .order_by(Subscription.id)
+                )
+            ).all()
+        )
