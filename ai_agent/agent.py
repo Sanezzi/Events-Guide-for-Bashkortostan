@@ -151,3 +151,27 @@ class CultureAgentService:
         else:
             run.trace.cost_usd += reservations[0][1]
         return response
+
+    async def _execute(self, run: _Run, name: str, args: BaseModel) -> Any:
+        if len(run.trace.tool_calls) >= 5:
+            raise ValueError("tool_limit")
+        trace = ToolCallTrace(name=name, args=args.model_dump(mode="json"))
+        run.trace.tool_calls.append(trace)
+        started = time.monotonic()
+        try:
+            result = await asyncio.wait_for(getattr(self.repository, name)(args),
+                timeout=self.settings.repository_timeout_seconds)
+            cards = ([result] if isinstance(result, EventCard) else getattr(result, "events", []))
+            for card in cards:
+                if not isinstance(card, EventCard):
+                    raise TypeError("repository returned an unvalidated event")
+                # Drafts never enter prompts, explanatory text, or recommendation state.
+                if card.status != "черновик":
+                    run.records[card.id] = card
+                    trace.result_ids.append(card.id)
+            return result
+        except Exception as exc:
+            trace.error = type(exc).__name__
+            raise
+        finally:
+            trace.duration_ms = (time.monotonic() - started) * 1000
