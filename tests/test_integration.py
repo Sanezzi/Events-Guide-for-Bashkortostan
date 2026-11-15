@@ -135,3 +135,25 @@ def test_new_city_overview_drops_previous_category(client):
     next_city = client.post("/api/chat", json={**session, "message": "Куда сходить в Уфе?"})
     assert next_city.status_code == 200
     assert [row["title"] for row in next_city.json()["events"]] == [event["title"]]
+
+
+@pytest.mark.parametrize("age, budget", [("шести", "тысячи рублей"), ("6", "1 000 ₽")])
+def test_family_search_recognizes_age_and_budget(client, age, budget):
+    start = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    rows = [
+        dict(title=title, city="Стерлитамак", age_limit=rating, category="спектакль",
+             venue="Зал", address="Адрес", description="Событие", date_start=start,
+             price_min=500, price_max=price, source_url=f"https://example.invalid/{i}")
+        for i, (title, rating, price) in enumerate([
+            ("Семейный спектакль", 6, 1000),
+            ("Спектакль для подростков", 12, 900),
+            ("Дорогой спектакль", 0, 1200),
+        ])
+    ]
+    uploaded = client.post("/api/v1/admin/import", headers={"X-Admin-Token": "test-admin"},
+                           files={"file": ("events.json", json.dumps(rows))})
+    assert uploaded.json()["added"] == 3
+    result = client.post("/api/chat", json={"session_id": "family",
+        "message": f"Куда сходить в Стерлитамаке с ребёнком {age} лет до {budget}?"}).json()
+    assert result["clarifying_question"] is None
+    assert [event["title"] for event in result["events"]] == ["Семейный спектакль"]
