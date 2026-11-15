@@ -363,3 +363,19 @@ class CultureAgentService:
         if not cards:
             return await self._finish_empty_search(run, state)
         return self._finish(run, state, cards)
+
+    def _validated_calls(self, calls, state):
+        tools = []
+        enforced = state.constraints.query().model_dump(mode="json", exclude_none=True)
+        for call in calls:
+            name = call.function.name
+            if name not in TOOL_MODELS:
+                raise ValueError("unknown_tool")
+            if len(call.function.arguments) > 16000:
+                raise ValueError("tool_arguments_too_large")
+            args = TOOL_MODELS[name].model_validate_json(call.function.arguments)
+            if name == "search_events":
+                merged = {**args.model_dump(mode="json"), **enforced}
+                args = TOOL_MODELS[name].model_validate_json(json.dumps(merged))
+            tools.append((name, args))
+        return tools
