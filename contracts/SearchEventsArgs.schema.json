@@ -1,0 +1,138 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "date_from": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date From"
+    },
+    "date_to": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date To"
+    },
+    "city": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "City"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "enum": [
+            "концерт",
+            "спектакль",
+            "выставка",
+            "фестиваль",
+            "кино",
+            "экскурсия",
+            "другое"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category"
+    },
+    "price_max": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Maximum upper ticket price, in RUB.",
+      "title": "Price Max"
+    },
+    "is_free": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Is Free"
+    },
+    "age_limit": {
+      "anyOf": [
+        {
+          "maximum": 120,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Visitor/child age: event rating must not exceed this age.",
+      "title": "Age Limit"
+    },
+    "duration_max": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "maximum": 10080,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duration Max"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text"
+    }
+  },
+  "title": "SearchEventsArgs",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

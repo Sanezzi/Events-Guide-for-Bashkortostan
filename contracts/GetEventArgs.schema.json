@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id"
+  ],
+  "title": "GetEventArgs",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

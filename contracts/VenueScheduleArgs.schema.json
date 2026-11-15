@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "date_from": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date From"
+    },
+    "date_to": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date To"
+    },
+    "venue": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Venue",
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue"
+  ],
+  "title": "VenueScheduleArgs",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

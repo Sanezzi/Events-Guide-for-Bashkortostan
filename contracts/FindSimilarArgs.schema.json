@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "date_from": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date From"
+    },
+    "date_to": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date To"
+    },
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "city": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "City"
+    }
+  },
+  "required": [
+    "event_id"
+  ],
+  "title": "FindSimilarArgs",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
