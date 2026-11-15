@@ -153,3 +153,22 @@ class AgentCatalog:
         identifier = await self.catalog.feedback(query.user_id, query.event_id, query.text)
         return agent.ActionResult(id=identifier or query.event_id, success=bool(identifier),
                                   message="Обращение сохранено." if identifier else "Событие не найдено.")
+
+
+class DatabaseTraceSink:
+    def __init__(self, database):
+        self.database = database
+
+    async def save(self, trace: agent.AgentTrace) -> None:
+        request = trace.request
+        payload = trace.model_dump(mode="json")
+        payload["request"] = {"message": request.get("message", "")}
+        for call in payload["tool_calls"]:
+            call["args"].pop("user_id", None)
+            if call["name"] == "save_feedback":
+                call["args"].pop("text", None)
+        async with self.database.sessions() as session:
+            session.add(StoredTrace(session_ref=digest(
+                [request.get("user_id"), request.get("session_id")]
+            )[:24], payload=payload))
+            await session.commit()
