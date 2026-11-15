@@ -371,3 +371,35 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(filters=values, field=None)
         await search_results(message, state, database, agent, settings=settings)
+
+    @router.callback_query(F.data.startswith("period:"))
+    async def period(query: CallbackQuery, state: FSMContext, database, agent=None, settings=None):
+        await answer_callback(query)
+        value = query.data.split(":", 1)[1]
+        if value not in {"today", "tomorrow", "weekend", "week"}:
+            return
+        data = await state.get_data()
+        values = {**data.get("filters", {}), "period": value, "page": 1}
+        values.pop("date", None)
+        await state.set_state(None)
+        await state.update_data(filters=values)
+        await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.callback_query(F.data.startswith("toggle:"))
+    async def toggle(query: CallbackQuery, state: FSMContext, database, agent=None, settings=None):
+        await answer_callback(query)
+        mode = query.data.split(":", 1)[1]
+        data = await state.get_data()
+        values = dict(data.get("filters", {}))
+        if mode == "free":
+            values["is_free"] = None if values.get("is_free") else True
+            if values["is_free"]:
+                values.pop("max_price", None)
+        elif mode == "bashkir":
+            values["language"] = None if values.get("language") else "ba"
+        else:
+            return
+        values["page"] = 1
+        await state.set_state(None)
+        await state.update_data(filters=values)
+        await search_results(query, state, database, agent, edit=True, settings=settings)
