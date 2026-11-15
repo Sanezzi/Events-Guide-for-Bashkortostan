@@ -252,3 +252,29 @@ async def venue_schedule(venue: str = Query(..., min_length=1, max_length=300), 
         date_to=aware(date_to) if date_to else None,
     ), page_size=100)
     return rows
+
+
+@app.post("/api/v1/subscriptions", response_model=ActionResult, tags=["events"])
+async def subscribe(body: SubscribeInput, request: Request, response: Response):
+    owner = web_identity(request, response)
+    if not body.city.strip():
+        raise HTTPException(422, "Укажите город")
+    row = await app.state.catalog.subscribe(owner, body.city, body.category, body.period)
+    return ActionResult(id=subscription_uuid(row), success=True, message="Подписка сохранена.")
+
+
+@app.get("/api/v1/subscriptions", tags=["events"])
+async def subscriptions(request: Request, response: Response):
+    owner = web_identity(request, response)
+    return [{"id": subscription_uuid(row), "city": row.city, "category": row.category, "period": row.period}
+            for row in await app.state.catalog.subscriptions(owner)]
+
+
+@app.delete("/api/v1/subscriptions/{identifier}", tags=["events"])
+async def unsubscribe(identifier: UUID, request: Request, response: Response):
+    owner = web_identity(request, response)
+    for row in await app.state.catalog.subscriptions(owner):
+        if subscription_uuid(row) == identifier:
+            await app.state.catalog.unsubscribe(owner, row.id)
+            return {"message": "Подписка удалена."}
+    raise HTTPException(404, "Подписка не найдена")
