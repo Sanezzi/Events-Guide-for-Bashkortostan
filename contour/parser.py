@@ -195,3 +195,61 @@ def parse_event_page(raw, page_url, *, now=None):
             if event is not None:
                 output.append(event)
     return list({event["id"]: event for event in output}.values())
+
+
+def structured_event(item, page_url, now, categories):
+    types = item.get("@type", [])
+    types = [types] if isinstance(types, str) else types
+    types = [kind.rsplit("/", 1)[-1] for kind in types]
+    if not any(kind.endswith("Event") or kind in categories for kind in types):
+        return None
+    if str(item.get("eventStatus", "")).rsplit("/", 1)[-1] in {
+        "EventCancelled", "EventPostponed", "EventMovedOnline",
+    }:
+        return None
+    title = strip_html(item["name"])
+    description = strip_html(item.get("description") or title)
+    start = datetime.fromisoformat(item["startDate"])
+    if "T" not in item["startDate"] and " " not in item["startDate"]:
+        return None
+    start = start.replace(tzinfo=TZ) if start.tzinfo is None else start
+    start = start.astimezone(TZ).replace(microsecond=0)
+    if start < now:
+        return None
+    audience = item.get("typicalAgeRange") or item.get("audience") or ""
+    age = parse_age(f"{audience} {title} {description}")
+    if age is None and isinstance(audience, str):
+        minimum = re.fullmatch(r"(0|6|12|16|18)(?:\s*-\s*\d*)?", audience.strip())
+        age = int(minimum[1]) if minimum else None
+    offers = item.get("offers") or []
+    offers = [offers] if isinstance(offers, dict) else offers
+    priced = [offer for offer in offers if isinstance(offer, dict)
+              and str(offer.get("priceCurrency", "")).upper() in {"RUB", "RUR"}]
+    prices = [(float(offer.get("lowPrice", offer.get("price"))),
+               float(offer.get("highPrice", offer.get("price")))) for offer in priced
+              if offer.get("price") is not None or {"lowPrice", "highPrice"} <= offer.keys()]
+    if not prices and item.get("isAccessibleForFree") is True:
+        prices = [(0, 0)]
+    if not prices or age is None:
+        return None
+    low, high = min(price[0] for price in prices), max(price[1] for price in prices)
+    location = item["location"]
+    address = location["address"]
+    source = source_link(page_url, item.get("url")) or source_link(page_url, page_url)
+    tickets = next((url for offer in priced if (url := source_link(page_url, offer.get("url")))), None)
+    end = datetime.fromisoformat(item["endDate"]) if item.get("endDate") else None
+    if end and end.tzinfo is None:
+        end = end.replace(tzinfo=TZ)
+    if end is not None:
+        end = end.astimezone(TZ).replace(microsecond=0)
+    category = next((categories[kind] for kind in types if kind in categories), "другое")
+    card = EventCard.model_validate_json(json.dumps({
+        "id": deterministic_id(source, title, start), "title": title, "description": description[:12000],
+        "category": category, "tags": event_tags(title, description, category, age, high == 0),
+        "date_start": start.isoformat(), "date_end": end.isoformat() if end else None,
+        "city": address["addressLocality"], "venue": location["name"], "address": address["streetAddress"],
+        "price_min": low, "price_max": high, "is_free": high == 0, "age_limit": age,
+        "source_url": source, "org_link": tickets, "source_type": "страница", "confidence": 0.8,
+        "status": "черновик",
+    }, ensure_ascii=False))
+    return card.model_dump(mode="json")
