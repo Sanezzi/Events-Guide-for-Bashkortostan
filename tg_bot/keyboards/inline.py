@@ -47,3 +47,29 @@ def back_row(lang: str, callback: str = "menu") -> list[InlineKeyboardButton]:
 
 def back_keyboard(lang: str, callback: str = "menu") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[back_row(lang, callback)])
+
+
+def https_url(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = urlparse(value)
+        return (
+            value if parsed.scheme == "https" and parsed.hostname and not parsed.username else None
+        )
+    except ValueError:
+        return None
+
+
+def external_url(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = urlparse(value)
+        return (
+            value
+            if parsed.scheme in {"https", "http"} and parsed.hostname and not parsed.username
+            else None
+        )
+    except ValueError:
+        return None
