@@ -30,3 +30,9 @@ class BackendClient:
     async def get_event(self, event_id: UUID):
         result = await self.request("GET", f"events/{event_id}")
         return EventOut.model_validate(result) if result else None
+
+    async def get_lang(self, user_id):
+        return await self.request("POST", "language", json={"user_id": user_id})
+
+    async def set_lang(self, user_id, lang):
+        await self.request("PUT", "language", json={"user_id": user_id, "lang": lang})
