@@ -119,3 +119,19 @@ def test_family_search_offers_alternative_cities_without_relaxing_age(client):
         "message": "Привет, куда сходить в Стерлитамаке с ребёнком 6 лет?"}).json()
     assert "в других городах" in result["reply_text"]
     assert [(e["city"], e["age_limit"]) for e in result["events"]] == [("Уфа", 6)]
+
+
+def test_new_city_overview_drops_previous_category(client):
+    event = dict(title="Концерт в Уфе", city="Уфа", category="концерт", venue="Зал",
+                 address="Адрес", description="Событие", price_min=100, age_limit=6,
+                 date_start=(datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+                 source_url="https://example.invalid/ufa")
+    uploaded = client.post("/api/v1/admin/import", headers={"X-Admin-Token": "test-admin"},
+                           files={"file": ("events.json", json.dumps([event]))})
+    assert uploaded.json()["added"] == 1
+    session = {"session_id": "switch-city"}
+    first = client.post("/api/chat", json={**session, "message": "Какие экскурсии есть в Стерлитамаке?"})
+    assert first.status_code == 200 and not first.json()["events"]
+    next_city = client.post("/api/chat", json={**session, "message": "Куда сходить в Уфе?"})
+    assert next_city.status_code == 200
+    assert [row["title"] for row in next_city.json()["events"]] == [event["title"]]
