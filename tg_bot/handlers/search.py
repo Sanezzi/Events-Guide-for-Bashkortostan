@@ -164,3 +164,14 @@ async def render_event(target, event, lang, settings=None, *, screen="open-event
     if compact:
         keyboard.inline_keyboard.insert(0, [button("bot.details", lang, f"agent-event:{event.id}")])
     await respond(target, "\n".join(lines), keyboard, edit=edit)
+
+
+async def show_event(target, database, event_id: UUID, settings=None, *, screen="open-event", edit=False):
+    lang = await language(database, target.from_user.id)
+    async with repository(database) as repo:
+        event = await repo.get_event(event_id)
+    if event is None:
+        back = {"event": "results", "agent-event": "agent", "agent-summary": "agent"}.get(screen, "menu")
+        await respond(target, html(t("bot.not_found", lang)), back_keyboard(lang, back), edit=edit)
+        return
+    await render_event(target, event, lang, settings, screen=screen, edit=edit)
