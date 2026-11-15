@@ -128,3 +128,29 @@ def price_text(event):
 
 def event_time(date):
     return aware(date).strftime('%d.%m.%Y, %H:%M')
+
+
+def detail_html(event):
+    label = 'Бесплатно' if event.is_free else event.category
+    fields = [
+        ('Категория', event.category), ('Начало', event_time(event.date_start)),
+        ('Город', event.city), ('Площадка', event.venue), ('Адрес', event.address),
+        ('Цена', price_text(event)), ('Возрастное ограничение', f'{event.age_limit}+'),
+        ('Статус', event.status),
+    ]
+    if event.date_end:
+        fields.insert(2, ('Окончание', event_time(event.date_end)))
+    rows = ''.join(f'<dt>{escape(label)}</dt><dd>{escape(value)}</dd>' for label, value in fields)
+    source_url, ticket_url = safe_link(event.source_url), safe_link(event.org_link)
+    links = []
+    if source_url:
+        links.append(f'<a class="btn" href="{escape(source_url, quote=True)}" target="_blank" rel="noopener">Источник события</a>')
+    if ticket_url:
+        links.append(f'<a class="btn ghost" href="{escape(ticket_url, quote=True)}" target="_blank" rel="noopener">Организатор / билеты</a>')
+    notice = '<p><strong>Событие отменено.</strong></p>' if event.status == 'отменено' else ''
+    badge_class = 'badge free' if event.is_free else 'badge'
+    return (
+        f'{notice}<span class="{badge_class}">{escape(label)}</span>'
+        f'<h1>{escape(event.title)}</h1><p>{escape(event.description)}</p>'
+        f'<dl>{rows}</dl><p>{" ".join(links)}</p>'
+    )
