@@ -198,3 +198,12 @@ async def list_events(
                            age_limit=age_limit, duration_max=duration_max, text=text)
     cards, total, reason = await app.state.catalog.filtered(args, page_size=limit, offset=offset, sort=sort, period=period)
     return SearchResult(events=cards, total=total, limit=limit, offset=offset, explanation=reason)
+
+
+@app.get("/api/v1/events/changes", tags=["events"])
+async def event_changes(since: datetime | None = None, limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0)):
+    rows = [e for e in await app.state.catalog.events() if e.updated_at and (since is None or e.updated_at > aware(since))]
+    changes = [{"id": e.id, "type": {"отменено": "cancelled", "черновик": "removed"}.get(e.status, "updated"),
+                "changed_at": e.updated_at, **({"event": e} if e.status != "черновик" else {})}
+               for e in sorted(rows, key=lambda e: (e.updated_at, e.id))]
+    return {"changes": changes[offset:offset + limit], "total": len(changes), "limit": limit, "offset": offset}
