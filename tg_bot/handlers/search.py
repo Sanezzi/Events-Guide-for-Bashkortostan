@@ -436,3 +436,19 @@ def create_router() -> Router:
             await respond(query, html(t("bot.not_found", lang)), back_keyboard(lang), edit=True)
             return
         await show_event(query, database, event_id, settings, screen=screen, edit=True)
+
+    @router.callback_query(F.data.startswith("confirm:"))
+    async def confirm_agent(query: CallbackQuery, state: FSMContext, database, agent=None):
+        await answer_callback(query)
+        if agent is None or query.message is None:
+            return
+        lang = await language(database, query.from_user.id)
+        version = query.data.split(":", 1)[1]
+        if (await state.get_data()).get("agent_confirmation") != version:
+            await respond(query, html(t("bot.expired", lang)), back_keyboard(lang, "agent"), edit=True)
+            return
+        await state.update_data(agent_confirmation=None)
+        reply = await agent.ask(user_id=str(query.from_user.id),
+                                session_id=str(query.message.chat.id), text="Подтверждаю",
+                                history=[], confirmation_version=version)
+        await respond(query, html(reply.text), back_keyboard(lang, "agent"), edit=True)
