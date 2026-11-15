@@ -377,3 +377,15 @@ def widget_page():
 @app.get("/widget.js")
 def widget_js():
     return FileResponse(FRONTEND / "widget.js", media_type="application/javascript")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    html = (PORTAL if PORTAL.is_file() else FRONTEND / "index.html").read_text(encoding="utf-8")
+    meta = discovery.metadata(discovery.SITE_TITLE, discovery.DESCRIPTION, discovery.root_url(request) + "/",
+                              noindex=bool(request.query_params))
+    cards = ""
+    if not request.query_params:
+        rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs())
+        cards = discovery.catalog_html(rows)
+    return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- catalog -->", cards, 1))
