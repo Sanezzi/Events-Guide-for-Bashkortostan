@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чат-агент — Афиша культуры Башкортостана</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="page-chat">
+<header class="topbar"><div class="wrap topbar-in"><a class="logo" href="/">Афиша <span>Башкортостана</span></a><nav><a href="/">Каталог</a><a href="/chat" aria-current="page">Чат-агент</a><a href="/subscribe">Подписка</a><a href="/about">О сервисе</a><a href="/admin">Модерация</a><a href="/docs">API · Swagger</a></nav></div></header>
+<main class="wrap">
+<section class="hero"><h1>Чат-агент афиши</h1><p>Напишите свободный запрос: город, дату, возраст ребёнка, бюджет и время. Агент разбирает ограничения, ищет только в базе сервиса и объясняет, почему события подходят. Ничего не выдумывает.</p><p class="hint">Примеры: «Что интересного в Стерлитамаке 2030-01-05?» · «Бесплатные выставки» · «Подпиши меня на Стерлитамак»</p><p class="meta landmark-caption" lang="ba">Шүлгәнташ — боронғо һүрәттәр мәмерйәһе.</p></section>
+<div class="chatbox">
+<div id="messages" class="messages" aria-live="polite"></div>
+<div id="confirm-box" class="confirm" hidden><p id="confirm-text" style="margin:0 0 10px;font-weight:700"></p><button class="btn" type="button" id="confirm-yes">Подтвердить</button> <button class="btn ghost" type="button" id="confirm-no">Отмена</button> <span class="meta">Подтверждение действует 300 секунд и только для этого предложения.</span></div>
+<form class="chat-form" id="chat-form"><label for="chat-input" style="position:absolute;left:-9999px">Сообщение агенту</label><input id="chat-input" type="text" maxlength="12000" placeholder="Например: Стерлитамак 2030-01-05, ребёнок 8 лет, до 1000 руб на двоих" autocomplete="off"><button class="btn" type="submit" id="chat-send">Отправить</button></form>
+</div>
+<p class="meta">Ответы строятся по данным сервиса, а не «мнением модели». Если модель недоступна, включается резервный режим поиска — чат честно помечает это в ответе. Полная трасса в браузер не отдаётся и хранится на сервере.</p>
+</main>
+<footer><div class="wrap"><p><strong>Афиша культуры Башкортостана</strong> — демонстрационный сервис, не официальный сайт Министерства культуры.</p></div></footer>
+<script src="/static/chat.js"></script>
+</body>
+</html>
