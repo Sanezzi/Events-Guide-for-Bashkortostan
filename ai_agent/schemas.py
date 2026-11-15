@@ -123,3 +123,12 @@ class AgentTrace(StrictModel):
     cost_usd: NonNegativeFloat = 0.0
     cost_estimated: bool = True
     fallback_reason: ShortText | None = None
+
+
+class AgentResponse(StrictModel):
+    reply_text: LongText
+    events: list[EventCard] = Field(default_factory=list, max_length=5)
+    clarifying_question: LongText | None = None
+    requires_confirmation: dict[str, Any] | None = None
+    is_fallback: bool = False
+    trace: AgentTrace = Field(default_factory=AgentTrace)
