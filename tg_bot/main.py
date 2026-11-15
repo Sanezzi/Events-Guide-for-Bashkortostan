@@ -31,3 +31,70 @@ class TraceMiddleware(BaseMiddleware):
             return await handler(event, data)
         finally:
             request_id.reset(marker)
+
+
+async def run() -> None:
+    settings = get_settings()
+    if not settings.bot_token:
+        raise RuntimeError("BOT_TOKEN is required in the environment or .env")
+    database = (BackendClient(settings.backend_url, settings.internal_api_token)
+                if settings.backend_url else Database(settings.database_url))
+    bot = Bot(settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    agent = database if isinstance(database, BackendClient) else None
+    dispatcher = Dispatcher(
+        storage=MemoryStorage(),
+        events_isolation=SimpleEventIsolation(),
+        database=database,
+        settings=settings,
+        agent=agent,
+    )
+    dispatcher.update.outer_middleware(TraceMiddleware())
+    dispatcher.include_router(create_router())
+    notifier = None
+    try:
+        if isinstance(database, Database):
+            await database.create_tables()
+        if settings.seed_sample and isinstance(database, Database):
+            sample = Path(__file__).parent / "data" / "sample_events.json"
+            async with database.sessions() as session:
+                report = await ImporterService(session).import_bytes(
+                    sample.read_bytes(), sample.name, actor="seed"
+                )
+                if report.rejected:
+                    raise RuntimeError("Sample import failed")
+            logger.info("demo_catalog_ready", extra={"event": "demo_catalog_ready"})
+        await bot.delete_webhook(drop_pending_updates=False)
+        await bot.set_chat_menu_button(menu_button=MenuButtonCommands())
+        await bot.set_my_commands(
+            [
+                BotCommand(command="start", description="Главное меню / Төп меню / Menu"),
+                BotCommand(command="ai", description="ИИ-помощник / ЯИ ярҙамсыһы / AI assistant"),
+                BotCommand(
+                    command="search", description="Поиск событий / Сараларҙы эҙләү / Search"
+                ),
+                BotCommand(
+                    command="subscriptions", description="Мои подписки / Яҙылыуҙар / Subscriptions"
+                ),
+                BotCommand(
+                    command="unsubscribe",
+                    description="Удалить подписки / Яҙылыуҙы бөтөрөү / Unsubscribe",
+                ),
+                BotCommand(command="help", description="Помощь / Ярҙәм / Help"),
+                BotCommand(command="cancel", description="Отмена / Баш тартыу / Cancel"),
+            ]
+        )
+        logger.info("bot_ready", extra={"event": "bot_ready"})
+        if agent is not None:
+            notifier = asyncio.create_task(send_notifications(bot, agent))
+        await dispatcher.start_polling(
+            bot, close_bot_session=False, allowed_updates=dispatcher.resolve_used_update_types()
+        )
+    finally:
+        if notifier:
+            notifier.cancel()
+            with suppress(asyncio.CancelledError):
+                await notifier
+        await dispatcher.storage.close()
+        await dispatcher.fsm.events_isolation.close()
+        await bot.session.close()
+        await database.close()
