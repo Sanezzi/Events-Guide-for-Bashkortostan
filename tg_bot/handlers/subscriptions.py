@@ -96,3 +96,41 @@ def create_router() -> Router:
                 city, category = event.city, event.category
             await repo.subscribe(str(query.from_user.id), city, category)
         await respond(query, html(t("bot.subscribed", lang)), back_keyboard(lang, back), edit=True)
+
+    @router.callback_query(F.data.startswith("unsubscribe:"))
+    async def unsubscribe_callback(query: CallbackQuery, database):
+        await answer_callback(query)
+        argument = query.data.split(":", 1)[1]
+        try:
+            subscription_id = None if argument == "all" else int(argument)
+            if subscription_id is not None and subscription_id <= 0:
+                return
+        except ValueError:
+            return
+        async with repository(database) as repo:
+            count = await repo.unsubscribe(
+                str(query.from_user.id), subscription_id
+            )
+        await show_subscriptions(query, database, edit=True, removed=count)
+
+    @router.message(Command("unsubscribe"))
+    async def unsubscribe_command(
+        message: Message, command: CommandObject, state: FSMContext, database
+    ):
+        await state.set_state(None)
+        argument = (command.args or "all").strip() or "all"
+        if argument:
+            try:
+                subscription_id = None if argument.lower() == "all" else int(argument)
+                if subscription_id is not None and subscription_id <= 0:
+                    raise ValueError
+            except ValueError:
+                await show_subscriptions(message, database)
+                return
+            async with repository(database) as repo:
+                count = await repo.unsubscribe(
+                    str(message.from_user.id), subscription_id
+                )
+        await show_subscriptions(message, database, removed=count)
+
+    return router
