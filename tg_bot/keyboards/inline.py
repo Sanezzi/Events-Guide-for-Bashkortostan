@@ -124,3 +124,24 @@ def filters_keyboard(lang: str) -> InlineKeyboardMarkup:
             back_row(lang, "results"),
         ]
     )
+
+
+def results_keyboard(
+    lang: str, items: list, page: int, total: int, page_size: int
+) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=str(event.title)[:80], callback_data=f"event:{event.id}")]
+        for event in items
+    ]
+    navigation = []
+    if page > 1:
+        navigation.append(InlineKeyboardButton(text=f"‹ {page - 1}", callback_data=f"page:{page - 1}"))
+    if page * page_size < total:
+        navigation.append(InlineKeyboardButton(text=f"{page + 1} ›", callback_data=f"page:{page + 1}"))
+    if navigation:
+        rows.append(navigation)
+    rows.append(
+        [button("bot.filters", lang, "filters"), button("bot.subscribe", lang, "subscribe:filters")]
+    )
+    rows.append(back_row(lang))
+    return InlineKeyboardMarkup(inline_keyboard=rows)
