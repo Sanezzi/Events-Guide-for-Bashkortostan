@@ -167,3 +167,22 @@ async def test_subscription_dedup_ownership_and_language_persistence(database):
         assert len(await repo.list_subscriptions("1")) == 1
         assert await repo.unsubscribe("1") == 1
         assert await repo.list_subscriptions("1") == []
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        dict(date_start="2099-11-15T18:00:00"),
+        dict(date_end="2099-11-15T17:00:00+05:00"),
+        dict(price_max=50),
+        dict(age_limit=7),
+        dict(source_url="javascript:bad"),
+        dict(is_free=True),
+        dict(confidence=2),
+        dict(lat=91),
+        dict(duration_min=20),
+    ],
+)
+def test_validation_rejects_inconsistent_fields(changes):
+    with pytest.raises(ValidationError):
+        EventInput.model_validate(event_row(**changes))
