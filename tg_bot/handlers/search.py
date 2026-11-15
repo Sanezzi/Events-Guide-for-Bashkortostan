@@ -49,3 +49,27 @@ FILTER_KEYS = {
     "date": "bot.date",
     "max_price": "bot.max_price",
 }
+
+
+def filter_summary(values: dict, lang: str) -> str:
+    parts = []
+    for field in ("q", "city", "category", "date", "max_price"):
+        if values.get(field) is not None:
+            value = category_label(values[field], lang) if field == "category" else values[field]
+            parts.append(f"{t(FILTER_KEYS[field], lang)}: {value}")
+    if values.get("period"):
+        parts.append(t("bot." + values["period"], lang))
+    if values.get("is_free"):
+        parts.append(t("bot.free", lang))
+    if values.get("language"):
+        parts.append(t("bot.bashkir", lang))
+    return t("bot.filter_summary", lang, filters=" · ".join(parts) or t("bot.any", lang))
+
+
+def display_date(value, settings=None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, datetime):
+        zone = ZoneInfo(getattr(settings, "timezone", "Asia/Yekaterinburg"))
+        return value.astimezone(zone).strftime("%d.%m.%Y %H:%M %Z")
+    return str(value)
