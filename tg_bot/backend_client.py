@@ -49,3 +49,7 @@ class BackendClient:
     async def unsubscribe(self, user_id, subscription_id=None):
         return await self.request("POST", "subscriptions/delete", json={
             "user_id": user_id, "subscription_id": subscription_id})
+
+    async def import_bytes(self, data, filename, *, actor):
+        return ImportReport.model_validate(await self.request("POST", "import", content=data,
+            params={"filename": filename, "actor": actor}))
