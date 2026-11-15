@@ -55,3 +55,20 @@ export const date = (value: string) => new Intl.DateTimeFormat('ru-RU', { timeZo
 export const time = (value: string | number) => new Intl.DateTimeFormat('ru-RU', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 export const price = (e: EventCard) => e.is_free ? 'Бесплатно' : e.price_known === false ? 'Цена уточняется' : e.price_min === e.price_max ? money(e.price_min) : `${money(e.price_min).replace(' ₽', '')}–${money(e.price_max)}`
 export const eventPath = (id: string) => '/event?id=' + encodeURIComponent(id)
+
+export const art = (name: string) => `${import.meta.env.BASE_URL}covers/${name}.webp`
+const covers: Record<Category, string[]> = {
+  спектакль: ['theatre', 'stage-blue', 'stage-moon'],
+  концерт: ['music', 'cello'],
+  выставка: ['gallery'],
+  фестиваль: ['craft', 'music'],
+  кино: ['stage-moon', 'stage-blue'],
+  экскурсия: ['urals'],
+  другое: ['craft', 'gallery'],
+}
+
+export function cover(event: EventCard) {
+  const options = covers[event.category] || covers.другое
+  const seed = Array.from(event.id).reduce((hash, char) => Math.imul(hash, 31) + char.charCodeAt(0) | 0, 0)
+  return art(options[(seed >>> 0) % options.length])
+}
