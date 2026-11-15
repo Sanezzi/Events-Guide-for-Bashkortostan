@@ -99,3 +99,26 @@ async def show_menu(target, database, *, edit=False) -> None:
     lang = await language(database, target.from_user.id)
     text = t("bot.welcome", lang)
     await respond(target, html(text), menu_keyboard(lang), edit=edit)
+
+
+def create_router() -> Router:
+    router = Router(name="start")
+
+    @router.message(CommandStart())
+    async def start(
+        message: Message, command: CommandObject, state: FSMContext, database, settings
+    ):
+        await state.clear()
+        payload = command.args or ""
+        if payload.startswith("event_") or len(payload) == 36:
+            from tg_bot.handlers.search import show_event
+
+            try:
+                event_id = UUID(payload.removeprefix("event_"))
+            except ValueError:
+                lang = await language(database, message.from_user.id)
+                await respond(message, html(t("bot.not_found", lang)), back_keyboard(lang))
+                return
+            await show_event(message, database, event_id, settings)
+            return
+        await show_menu(message, database)
