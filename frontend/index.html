@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- metadata -->
+<link rel="stylesheet" href="/static/styles.css">
+<style>
+.page-home .coat{display:flex;justify-content:center;margin:6px 0 4px;animation:coat-in 1s ease-out both}
+.page-home .coat svg{width:104px;height:auto;filter:drop-shadow(0 10px 22px rgba(18,63,44,.22))}
+@keyframes coat-in{from{opacity:0;transform:translateY(-10px) scale(.94)}to{opacity:1;transform:none}}
+.page-home .greeting{text-align:center;margin-inline:auto;max-width:860px;animation:greeting-in .9s ease-out .15s both}
+.page-home .greeting .ornament{text-align:center;color:#c9971c;letter-spacing:.35em}
+.page-home .greeting-ba{font-size:clamp(26px,4.4vw,42px);line-height:1.15;font-weight:800;margin:0 0 8px;background:linear-gradient(92deg,#0f5a3c 10%,#0b7a4b 45%,#c9971c 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-home .greeting .hint{text-align:center;margin-inline:auto}
+@keyframes greeting-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.topbar .search.topbar-search{flex:1 1 320px;max-width:560px;margin:6px 0}
+.topbar .search.topbar-search input{border:0;min-width:0}
+@media (prefers-reduced-motion: reduce){.page-home .coat,.page-home .greeting{animation:none}}
+.page-home .hero{background-image:linear-gradient(90deg,rgba(253,246,216,.94) 0%,rgba(253,246,216,.78) 46%,rgba(253,246,216,.18) 78%,rgba(253,246,216,0) 100%),url(/static/hero-bg.jpg);background-size:cover;background-position:center right;background-repeat:no-repeat}
+.ai-badge{display:inline-block;background:#0f5a3c;color:#fff;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;letter-spacing:.03em;margin:0 0 10px}
+</style>
+
+<script src="/static/bg.js" defer></script>
+</head>
+<body class="page-home">
+<canvas id="kurai-bg" class="kurai-bg" aria-hidden="true"></canvas>
+<header class="topbar"><div class="wrap topbar-in"><a class="logo" href="/">Афиша <span>Башкортостана</span></a><nav><a href="/" aria-current="page">Каталог</a><a href="/subscribe">Подписка</a><a href="/about">О сервисе</a><a href="/admin">Модерация</a></nav></div></header>
+<main class="wrap">
+<section class="hero"><svg class="kurai" viewBox="0 0 220 340" aria-hidden="true" focusable="false"><g class="kurai-sway"><path d="M112 338 C110 270 116 200 104 118" fill="none" stroke="rgba(23,94,52,.75)" stroke-width="4" stroke-linecap="round"/><path d="M110 280 C84 268 68 244 66 224 C88 232 102 254 110 272 Z" fill="rgba(27,116,62,.45)"/><path d="M111 236 C136 224 152 202 154 182 C132 190 118 212 111 228 Z" fill="rgba(27,116,62,.45)"/><path d="M109 190 C88 180 76 162 74 146 C92 152 104 168 109 182 Z" fill="rgba(27,116,62,.45)"/><g stroke="rgba(15,90,60,.6)" stroke-width="1.4" fill="none"><path d="M104 118 L52 82"/><path d="M104 118 L68 66"/><path d="M104 118 L92 52"/><path d="M104 118 L118 48"/><path d="M104 118 L142 58"/><path d="M104 118 L160 76"/><path d="M104 118 L172 96"/></g><g fill="#e8b33c"><circle cx="52" cy="82" r="4"/><circle cx="68" cy="66" r="4"/><circle cx="92" cy="52" r="4"/><circle cx="118" cy="48" r="4"/><circle cx="142" cy="58" r="4"/><circle cx="160" cy="76" r="4"/><circle cx="172" cy="96" r="4"/></g><circle cx="104" cy="114" r="5" fill="#e8b33c"/></g></svg><div class="coat" role="img" aria-label="Герб Республики Башкортостан"><svg viewBox="0 0 120 140" aria-hidden="true" focusable="false"><defs><linearGradient id="coatSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7db8e8"/><stop offset="1" stop-color="#dceefb"/></linearGradient><linearGradient id="coatGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d47c"/><stop offset="1" stop-color="#c9971c"/></linearGradient></defs><path d="M60 4 L108 16 V62 C108 96 88 118 60 134 C32 118 12 96 12 62 V16 Z" fill="#fdfaf0" stroke="url(#coatGold)" stroke-width="4"/><circle cx="60" cy="58" r="40" fill="url(#coatSky)" stroke="#c9971c" stroke-width="2"/><g stroke="#e8b33c" stroke-width="2.4" stroke-linecap="round"><path d="M60 22 V12"/><path d="M38 30 L31 21"/><path d="M82 30 L89 21"/><path d="M26 52 L15 47"/><path d="M94 52 L105 47"/></g><circle cx="60" cy="58" r="11" fill="#f6d47c"/><path d="M28 92 C40 76 50 74 58 80 L66 66 L72 80 C82 76 90 82 94 92 L94 98 L28 98 Z" fill="#123f2c"/><g stroke="#0f5a3c" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="M60 122 V106"/><path d="M60 108 L48 100"/><path d="M60 108 L54 97"/><path d="M60 108 L66 97"/><path d="M60 108 L72 100"/></g><g fill="#e8b33c"><circle cx="48" cy="99" r="3"/><circle cx="54" cy="96" r="3"/><circle cx="66" cy="96" r="3"/><circle cx="72" cy="99" r="3"/><circle cx="60" cy="105" r="3.4"/></g></svg></div><div class="greeting"><p class="ornament" aria-hidden="true">◆ ◆ ◆</p><p lang="ba" class="greeting-ba">Хәйерле көн! Рәхим итегеҙ — Башҡортостандың мәҙәни афишаһы</p><p lang="ba" class="hint">Концерттар, спектаклдәр һәм күргәҙмәләр — бер урында.</p></div><p class="ai-badge">✦ Поиск работает с ИИ</p><h1>Куда пойти в Башкортостане?</h1><p>Концерты, спектакли, выставки, фестивали, кино и экскурсии — только проверенные события с источником. Без выдуманных карточек.</p><form class="search" id="search-form" role="search"><label for="q" style="position:absolute;left:-9999px">Поиск по названию и описанию</label><input id="q" name="text" type="search" placeholder="Название, категория или ключевое слово"><button class="btn" type="submit">Найти</button></form><p class="meta landmark-caption kurai-caption">Курай — реброплодник уральский, символ Башкортостана.</p></section>
+<section class="chatbox" id="inline-agent" aria-label="Чат-агент на главной"><div class="agent-head"><h2>ИИ-агент афиши</h2><p>Поиск работает с ИИ: просто напишите, куда хотите сходить</p></div><div id="agent-messages" class="messages" style="min-height:0;max-height:320px" aria-live="polite"><div class="msg bot">Я — ИИ-поиск афиши. Напишите запрос своими словами, я сам пойму город, дату, возраст и бюджет и подберу события из базы.</div></div><form class="chat-form" id="agent-form"><label for="agent-input" style="position:absolute;left:-9999px">Сообщение агенту</label><input id="agent-input" type="text" maxlength="12000" placeholder="Спросите ИИ своими словами…" autocomplete="off"><button class="btn" type="submit" id="agent-send">Спросить ИИ</button></form><p class="meta" id="agent-status"></p></section>
+<form class="filters" id="filters" aria-label="Фильтры каталога">
+<label>Город<select name="city" id="city"><option value="">Все города</option></select></label>
+<label>Площадка<select name="venue" id="venue"><option value="">Все площадки</option></select></label>
+<p id="venue-status" class="meta" role="status" hidden></p>
+<label>Категория<select name="category" id="category"><option value="">Все категории</option><option>концерт</option><option>спектакль</option><option>выставка</option><option>фестиваль</option><option>кино</option><option>экскурсия</option><option>другое</option></select></label>
+<label>Дата с<input type="date" name="date_from" id="date_from"></label>
+<label>Дата по<input type="date" name="date_to" id="date_to"></label>
+<label>Цена до, ₽<input type="number" name="price_max" id="price_max" min="0" step="1" placeholder="1000"></label>
+<label>Возраст ребёнка<input type="number" name="age_limit" id="age_limit" min="0" max="120" placeholder="8"></label>
+<label class="check"><input type="checkbox" name="is_free" id="is_free"> Только бесплатные</label>
+<label>Сортировка<select name="sort" id="sort"><option value="date_start">Сначала ближайшие</option><option value="price_min">Сначала дешёвые</option><option value="price_max_desc">Сначала дорогие</option><option value="price_max">По максимальной цене ↑</option><option value="title">По названию</option></select></label>
+<div class="actions"><button class="btn" type="submit">Применить фильтры</button><button class="btn ghost" type="button" id="reset-filters">Сбросить</button></div>
+</form>
+<p id="result-meta" class="meta" aria-live="polite">Загрузка афиши…</p>
+<div id="catalog" class="grid" aria-live="polite"><!-- catalog --></div>
+<p id="empty" class="empty" hidden></p><button type="button" id="more-events" class="btn ghost" hidden>Показать ещё</button>
+
+
+</main>
+<footer><div class="wrap"><p><strong>Афиша культуры Башкортостана</strong> — независимый агрегатор культурных событий Республики Башкортостан.</p><p> <a href="/openapi.json">OpenAPI</a> · Виджет: <a href="/widget">/widget</a></p></div></footer>
+<script src="/static/index.js"></script>
+</body>
+</html>
