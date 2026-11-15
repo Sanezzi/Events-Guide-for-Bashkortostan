@@ -225,3 +225,28 @@ class CultureAgentService:
         if state.constraints.route:
             return dialogue.make_route(eligible, state.constraints, self.settings.transfer_buffer_min)
         return eligible[:5]
+
+    async def _finish_empty_search(self, run: _Run, state: _Session) -> AgentResponse:
+        constraints = state.constraints
+        if constraints.city and not constraints.route:
+            alternatives = []
+            if constraints.date_from is not None or constraints.date_to is not None:
+                alternatives.append((
+                    replace(constraints, date_from=None, date_to=None),
+                    f"В городе {constraints.city} есть варианты на другие даты.",
+                ))
+            alternatives.append((
+                replace(constraints, city=None),
+                "Есть варианты в других городах Башкортостана. Город указан в каждой карточке.",
+            ))
+            for filters, note in alternatives:
+                if len(run.trace.tool_calls) >= 5:
+                    break
+                await self._execute(run, "search_events", filters.query())
+                candidates = [event for event in run.records.values()
+                              if not dialogue.eligible(event, constraints, run.now)]
+                cards = self._select(run, replace(state, constraints=filters), candidates)
+                if cards:
+                    run.trace.plan.append("offer_catalog_alternatives")
+                    return self._finish(run, state, cards, text=f"Точного совпадения нет. {note}")
+        return self._finish(run, state, text=await self._empty_explanation(run, state))
