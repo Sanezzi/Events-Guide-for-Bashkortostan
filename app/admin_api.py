@@ -60,3 +60,39 @@ async def import_events(request: Request, file: UploadFile = File(...)):
     if len(content) > ImporterService.MAX_BYTES:
         raise HTTPException(413, "Файл превышает 10 МиБ")
     return await request.app.state.catalog.import_file(content, file.filename or "", "web-admin")
+
+
+async def save(request, event, *, existing=None):
+    data = event.model_dump(mode="json", include=set(EventInput.model_fields))
+    data["source_type"] = SOURCE_CODES[event.source_type]
+    data.pop("source_hash", None)
+    data.pop("dedup_key", None)
+    if not safe_link(event.source_url) or (event.org_link and not safe_link(event.org_link)):
+        raise HTTPException(422, "Укажите действительную ссылку HTTP или HTTPS")
+    if existing:
+        data["status"] = existing.status
+    report = await request.app.state.catalog.import_file(
+        json.dumps([data], ensure_ascii=False).encode(), "manual.json", "web-admin",
+        merge_existing=existing is not None,
+    )
+    if report.rejected:
+        raise HTTPException(422, {"code": "INVALID_EVENT", "message": "Проверьте поля карточки", "details": report.errors})
+    return await request.app.state.catalog.record(event.id)
+
+
+@router.post("/events", status_code=201, response_model=EventCard)
+async def create_event(request: Request, body: EventCard):
+    if await request.app.state.catalog.record(body.id):
+        raise HTTPException(409, "Событие с таким идентификатором уже существует")
+    row = await save(request, body)
+    if row is None:
+        raise HTTPException(409, "Импорт объединён с существующей карточкой")
+    return row
+
+
+@router.put("/events/{event_id}", response_model=EventCard)
+async def edit_event(request: Request, event_id: UUID, body: EventCard):
+    existing = await request.app.state.catalog.record(event_id)
+    if existing is None:
+        raise HTTPException(404, "Событие не найдено")
+    return await save(request, body.model_copy(update={"id": event_id}), existing=existing)
