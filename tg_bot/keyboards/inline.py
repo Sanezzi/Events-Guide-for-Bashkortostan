@@ -145,3 +145,17 @@ def results_keyboard(
     )
     rows.append(back_row(lang))
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def event_keyboard(lang: str, event: object, *, screen: str, back: str) -> InlineKeyboardMarkup:
+    rows = []
+    links = []
+    for key, field in (("bot.source", "source_url"), ("bot.tickets", "org_link")):
+        url = external_url(getattr(event, field, None))
+        if url and not any(link.url == url for link in links):
+            links.append(InlineKeyboardButton(text=t(key, lang), url=url))
+    if links:
+        rows.append(links)
+    rows.append([button("bot.subscribe", lang, f"subscribe:{screen}:{event.id}")])
+    rows.append(back_row(lang, back))
+    return InlineKeyboardMarkup(inline_keyboard=rows)
