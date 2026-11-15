@@ -175,3 +175,63 @@ async def show_event(target, database, event_id: UUID, settings=None, *, screen=
         await respond(target, html(t("bot.not_found", lang)), back_keyboard(lang, back), edit=edit)
         return
     await render_event(target, event, lang, settings, screen=screen, edit=edit)
+
+
+async def agent_search(
+    message: Message, state: FSMContext, database, agent, text: str, settings=None
+) -> bool:
+    if agent is None:
+        return False
+    data = await state.get_data()
+    history = data.get("history", [])[-12:]
+    try:
+        async with repository(database) as repo:
+            service = BotService(repo, agent, timeout=30)
+            reply = await asyncio.wait_for(
+                service.ask(str(message.from_user.id), str(message.chat.id), text, history),
+                timeout=30,
+            )
+    except Exception:
+        # A model failure must never disable deterministic catalog search.
+        return False
+    if reply is None:
+        return False
+    lang = await language(database, message.from_user.id)
+    await state.update_data(
+        history=(
+            history
+            + [{"role": "user", "content": text}, {"role": "assistant", "content": str(reply.text)}]
+        )[-12:],
+        agent_confirmation=reply.confirmation_version,
+    )
+    if reply.text and (not reply.event_ids or "Точного совпадения нет" in reply.text):
+        await send_long(message, str(reply.text), back_keyboard(lang, "agent"))
+    elif reply.is_fallback:
+        await message.answer("Работаю в резервном режиме поиска.", reply_markup=back_keyboard(lang, "agent"))
+    if reply.confirmation_version:
+        await message.answer("Сохранить действие?", reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="Подтвердить", callback_data=f"confirm:{reply.confirmation_version}"),
+        ], back_row(lang, "agent")]))
+    if reply.clarification and reply.clarification != reply.text:
+        await send_long(message, str(reply.clarification), back_keyboard(lang, "agent"))
+        return True
+    valid = []
+    async with repository(database) as repo:
+        for identifier in reply.event_ids[:5]:
+            try:
+                event = await repo.get_event(UUID(str(identifier)))
+            except (TypeError, ValueError):
+                continue
+            status = getattr(event, "status", "") if event else ""
+            if event and getattr(status, "value", status) not in {
+                "cancelled",
+                "отменено",
+                "draft",
+                "черновик",
+            }:
+                valid.append(event)
+    if valid:
+        for event in valid:
+            await render_event(message, event, lang, settings, screen="agent-summary")
+        return True
+    return bool(reply.text)
