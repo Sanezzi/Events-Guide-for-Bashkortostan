@@ -211,3 +211,24 @@ class MockEventRepository:
             return ActionResult(id=action_id, success=False, message="Событие не найдено; обращение не сохранено.")
         self.feedback.append(query.model_copy(deep=True))
         return ActionResult(id=action_id, success=True, message="ДЕМО: обращение сохранено в памяти; организатору не отправлялось.")
+
+
+class ApiOrDbRepositoryStub:
+    """Integration seam: implement against an approved official JSON API or DB."""
+    async def search_events(self, query: SearchEventsArgs) -> SearchResult:
+        raise NotImplementedError("TODO: parameterized API/DB search; published-only, date, upper-price and age filters.")
+
+    async def get_event(self, query: GetEventArgs) -> EventCard | None:
+        raise NotImplementedError("TODO: fetch a validated card by UUID, retaining cancellation/draft status.")
+
+    async def find_similar(self, query: FindSimilarArgs) -> SearchResult:
+        raise NotImplementedError("TODO: query published similar events and exclude the original UUID.")
+
+    async def get_venue_schedule(self, query: VenueScheduleArgs) -> SearchResult:
+        raise NotImplementedError("TODO: resolve venue and query its published schedule within inclusive date bounds.")
+
+    async def subscribe(self, query: SubscribeArgs) -> ActionResult:
+        raise NotImplementedError("TODO: persist the confirmed subscription idempotently with a bound user identity.")
+
+    async def save_feedback(self, query: FeedbackArgs) -> ActionResult:
+        raise NotImplementedError("TODO: verify event and identity, then persist confirmed feedback and return its UUID.")
