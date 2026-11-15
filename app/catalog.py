@@ -114,3 +114,33 @@ class Catalog:
 
 def subscription_uuid(row):
     return uuid5(NAMESPACE_URL, f"afisha:subscription:{row.user_id}:{row.id}")
+
+
+class AgentCatalog:
+    def __init__(self, catalog: Catalog):
+        self.catalog = catalog
+
+    async def search_events(self, query: agent.SearchEventsArgs) -> agent.SearchResult:
+        args = SearchEventsArgs.model_validate(query.model_dump())
+        rows, _, _ = await self.catalog.filtered(args, page_size=100)
+        return agent.SearchResult(events=[agent_card(row) for row in rows])
+
+    async def get_event(self, query: agent.GetEventArgs):
+        row = await self.catalog.event(query.event_id)
+        return agent_card(row) if row else None
+
+    async def find_similar(self, query: agent.FindSimilarArgs) -> agent.SearchResult:
+        row = await self.catalog.event(query.event_id)
+        if row is None:
+            return agent.SearchResult()
+        rows, _, _ = await self.catalog.filtered(SearchEventsArgs(
+            city=query.city or row.city, category=row.category, date_from=query.date_from,
+            date_to=query.date_to,
+        ), page_size=6)
+        return agent.SearchResult(events=[agent_card(e) for e in rows if e.id != row.id][:5])
+
+    async def get_venue_schedule(self, query: agent.VenueScheduleArgs) -> agent.SearchResult:
+        rows, _, _ = await self.catalog.filtered(SearchEventsArgs(
+            venue=query.venue, date_from=query.date_from, date_to=query.date_to,
+        ), page_size=100)
+        return agent.SearchResult(events=[agent_card(row) for row in rows])
