@@ -70,3 +70,23 @@ async def set_language(request: Request, body: Language):
     async with request.app.state.database.sessions() as session:
         await SqlCatalogRepository(session).set_lang(body.user_id, body.lang)
     return {"ok": True}
+
+
+def subscription(row):
+    return {"id": row.id, "city": row.city, "category": row.category, "period": row.period}
+
+
+@router.post("/subscriptions")
+async def subscribe(request: Request, body: Subscribe):
+    row = await request.app.state.catalog.subscribe(bot_identity(body.user_id), body.city, body.category)
+    return subscription(row)
+
+
+@router.post("/subscriptions/list")
+async def list_subscriptions(request: Request, body: BotUser):
+    return [subscription(row) for row in await request.app.state.catalog.subscriptions(bot_identity(body.user_id))]
+
+
+@router.post("/subscriptions/delete")
+async def unsubscribe(request: Request, body: Unsubscribe):
+    return await request.app.state.catalog.unsubscribe(bot_identity(body.user_id), body.subscription_id)
