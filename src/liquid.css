@@ -1,0 +1,214 @@
+.hero-liquid {
+  position: relative;
+  isolation: isolate;
+  padding-top: clamp(34px, 4.1vw, 60px);
+  padding-bottom: clamp(40px, 5vw, 76px);
+}
+
+.hero-liquid::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background: radial-gradient(ellipse 48% 55% at 28% 34%, #f4dfb473, transparent), radial-gradient(ellipse 45% 51% at 72% 62%, #dbe5d799, transparent);
+  mask-image: linear-gradient(transparent, black 12% 86%, transparent);
+  pointer-events: none;
+}
+
+.hero-liquid .hero-actions .button {
+  border-radius: 999px;
+  padding-inline: 1.15rem;
+}
+
+.landscape-liquid {
+  aspect-ratio: 1.27;
+  border-radius: 22px 96px 22px 96px;
+  max-height: 510px;
+  box-shadow: 0 21px 50px #1b452930;
+  background: #294e3c;
+}
+
+.landscape-photo, .landscape-veil, .landscape-ink, .valley-mist {
+  position: absolute;
+  pointer-events: none;
+}
+
+.landscape-photo { inset: -18px; }
+.landscape-photo picture,.landscape-photo img { display: block; width: 100%; height: 100%; }
+.landscape-photo img { object-fit: cover; object-position: 55% 49%; }
+.landscape-veil {
+  inset: 0;
+  background: linear-gradient(180deg, #162e2425, transparent 34%, #0b25100c 46%, #091f20a8);
+}
+.landscape-liquid .landscape-ink { inset: 0; width:100%; height:100%; }
+.landscape-liquid::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+  inset: 11px;
+  border: 1px solid #ffedc78c;
+  border-radius: 15px 85px 15px 85px;
+}
+.valley-mist {
+  inset: 25% -18% 7%;
+  background: radial-gradient(ellipse at 38% 55%, #e6d7ad45, transparent 59%);
+  animation: valley-drift 16s ease-in-out infinite alternate;
+}
+@keyframes valley-drift {
+  from { transform: translateX(-13%) translateY(3%); opacity: .35; }
+  to { transform: translateX(15%) translateY(-6%); opacity: .85; }
+}
+.landscape-contours { stroke: #fdedbf; opacity: .56; fill: none; stroke-width: .85; }
+.kurai-sway {
+  stroke: #fff2ce;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  transform-origin: 58% 94%;
+  animation: kurai-sway 9s 1.4s ease-in-out infinite alternate;
+}
+.kurai-petal, .kurai-stem { filter: drop-shadow(0 1px 3px #161d12c9); }
+.kurai-orbit { opacity: .57; stroke-width: .8; }
+.orbit-dashed { stroke-dasharray: 2 5; }
+.kurai-center { fill: #f9e5a7; }
+@keyframes kurai-sway {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2deg); }
+}
+.landscape-liquid .landscape-label {
+  inset: auto auto 23px 44px;
+  line-height: 1.5;
+  padding: .46rem .7rem;
+  border-radius: 999px;
+  border: 1px solid #f9ecd752;
+  background: #14352bdb;
+  backdrop-filter: blur(5px);
+}
+
+.liquid-ribbon {
+  position: relative;
+  padding-block: 1.05rem;
+  background: #114b3a linear-gradient(107deg, #0a362b, #1a5946 57%, #0e4133);
+  border-block: 1px solid #5e856560;
+}
+.liquid-ribbon::after {
+  position: absolute;
+  inset: 5px 0;
+  content: "";
+  border-block: 1px solid #d8be8a45;
+  pointer-events: none;
+}
+.liquid-ribbon .marquee-run { gap: 2rem; padding-right: 2rem; }
+.liquid-ribbon .marquee-run span { gap: 2rem; }
+
+.catalog-search {
+  border-radius: 18px;
+  padding: 7px 8px 7px 16px;
+  box-shadow: 0 7px 24px #1933270a;
+}
+.catalog-search .button { border-radius: 11px; }
+.ticket { border-radius: 16px 16px 8px 8px; overflow: visible; }
+.ticket-cover { border-radius: 14px 14px 0 0; }
+.ticket-light { border-radius: inherit; }
+.ticket-body { padding: 13px 14px 12px; }
+.ticket-date { color: #215770; }
+.category-tag { border-radius: 999px; }
+.age-tag { border-radius: 999px; }
+
+.planner-banner {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: .92fr 1.08fr;
+  min-height: 348px;
+  margin-bottom: clamp(34px, 5vw, 75px);
+  color: #fff4dc;
+  background: #114b3a;
+  border-radius: 24px 84px 24px 24px;
+}
+.planner-banner-copy {
+  padding: clamp(24px, 4vw, 60px);
+  align-self: center;
+}
+.planner-banner h2 {
+  margin: .7rem 0 .85rem;
+  font: 650 clamp(1.75rem, 3.6vw, 3.35rem)/1.18 var(--display);
+  letter-spacing: -.04em;
+}
+.planner-banner p {
+  max-width: 330px;
+  color: #edf1db;
+  line-height: 1.55;
+  margin-bottom: 1.2rem;
+}
+.planner-banner .button {
+  border-radius: 999px;
+  padding-inline: 1rem;
+}
+.planner-banner-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e4ca8c77;
+  border-radius: 50%;
+  color: #f5cf83;
+}
+.planner-banner-art {
+  position: relative;
+  min-width: 0;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 54% 0 0 42% / 110% 0 0 75%;
+  background: #294f48;
+}
+.planner-banner-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 60%;
+  transition: transform 1s cubic-bezier(.22,1,.36,1);
+}
+.planner-banner:hover .planner-banner-art img { transform: scale(1.045); }
+.planner-banner-art::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(130deg, #0a372965, transparent 55%, #09282046);
+}
+.planner-banner-ornament {
+  position: absolute;
+  width: 130px;
+  right: 20px;
+  bottom: 22px;
+  color: #fcefca;
+  z-index: 1;
+  filter: drop-shadow(0 1px 3px #081c14);
+}
+
+@media (max-width: 850px) {
+  .landscape-liquid { border-radius: 16px 65px 16px 65px; }
+  .landscape-liquid::after { border-radius: 10px 57px 10px 57px; inset: 8px; }
+  .landscape-liquid .landscape-label { left: 24px; bottom: 21px; }
+}
+@media (max-width: 620px) {
+  .hero-liquid { padding-bottom: 26px; }
+  .hero-liquid .hero-actions .button { padding-inline: .73rem; }
+  .landscape-liquid { aspect-ratio: 1.34; }
+  .landscape-liquid .landscape-label { left: 20px; bottom: 16px; padding: .33rem .53rem; }
+  .liquid-ribbon { padding-block: .74rem; }
+  .catalog-search { padding: 5px 6px 5px 8px; border-radius: 12px; }
+  .catalog-search .button { border-radius: 8px; }
+  .ticket-body { padding: 9px 7px; }
+  .planner-banner { grid-template-columns: 1fr; border-radius: 18px 49px 18px 18px; }
+  .planner-banner-copy { padding: 21px 18px; }
+  .planner-banner-art { min-height: 165px; border-radius: 26% 0 0 0 / 48% 0 0 0; }
+  .planner-banner-ornament { width: 90px; bottom: 13px; right: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .valley-mist, .kurai-sway { animation: none; }
+}
