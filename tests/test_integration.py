@@ -157,3 +157,34 @@ def test_family_search_recognizes_age_and_budget(client, age, budget):
         "message": f"Куда сходить в Стерлитамаке с ребёнком {age} лет до {budget}?"}).json()
     assert result["clarifying_question"] is None
     assert [event["title"] for event in result["events"]] == ["Семейный спектакль"]
+
+
+def test_shared_catalog_import_moderation_and_agent(client):
+    start = datetime.now(timezone.utc) + timedelta(days=7)
+    event_id = str(uuid4())
+    event = dict(id=event_id, title="Тестовый концерт", category="концерт",
+                 city="Уфа", venue="Тестовый зал", address="Тестовый адрес",
+                 description="Тестовая запись", date_start=start.isoformat(),
+                 price_min=200, price_max=300, age_limit=6,
+                 source_url="https://example.invalid/test", status="опубликовано")
+    admin = {"X-Admin-Token": "test-admin"}
+    bot = {"X-Internal-Token": "test-bot"}
+    result = client.post("/api/v1/admin/import", headers=admin,
+                         files={"file": ("events.json", json.dumps([event]))})
+    assert result.status_code == 200, result.text
+    assert result.json()["added"] == 1
+    events = client.get("/api/v1/events", params={"city": "Уфа"}).json()["events"]
+    assert [e["id"] for e in events] == [event_id]
+    result = client.post("/internal/bot/search", headers=bot, json={"city": "Уфа"})
+    assert [e["id"] for e in result.json()["items"]] == [event_id]
+    result = client.post("/api/chat", json={"session_id": "test", "message": "Концерт в Уфе"})
+    assert result.json()["is_fallback"]
+    assert [e["id"] for e in result.json()["events"]] == [event_id]
+    assert client.patch(f"/api/v1/admin/events/{event_id}/status", headers=admin,
+                        json={"status": "отменено"}).status_code == 200
+    assert client.get("/api/v1/events").json()["events"] == []
+    assert client.get(f"/api/v1/events/{event_id}").json()["status"] == "отменено"
+    event["description"] = "Обновление исходной записи"
+    assert client.post("/api/v1/admin/import", headers=admin,
+                       files={"file": ("events.json", json.dumps([event]))}).json()["updated"] == 1
+    assert client.get(f"/api/v1/events/{event_id}").json()["status"] == "отменено"
