@@ -315,3 +315,25 @@ async def test_periods_and_past_exclusion(database, monkeypatch):
 def test_postgres_schema_compiles():
     for table in Event.metadata.sorted_tables:
         assert "CREATE TABLE" in str(CreateTable(table).compile(dialect=postgresql.dialect()))
+
+
+@pytest.mark.asyncio
+async def test_sample_data_explicitly_fictional_and_importable(database):
+    path = Path(__file__).parents[1] / "data" / "sample_events.json"
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    assert len(rows) == 15
+    assert sum(row["status"] == "отменено" for row in rows) == 1
+    assert any(row["language"] == "ba" for row in rows)
+    for row in rows:
+        assert row["is_demo"] and "DEMO" in row["title"]
+        assert "вымышленное" in row["description"]
+        assert "example.invalid" in row["source_url"]
+        assert datetime.fromisoformat(row["date_start"]) > datetime(
+            2026, 11, 14, tzinfo=timezone.utc
+        )
+    async with database.sessions() as session:
+        report = await ImporterService(session).import_bytes(path.read_bytes(), path.name)
+        assert report.added == 15 and report.rejected == 0
+        assert (
+            await ImporterService(session).import_bytes(path.read_bytes(), path.name)
+        ).unchanged == 15
