@@ -54,7 +54,6 @@ export async function nextRouteDays(selection: RouteSearch) {
   let currentDay = ''
   let sameDay: EventCard[] = []
 
-  // The catalog orders results by start time, so a date may span pages.
   for await (const page of eventPages({
     city: selection.city, date_from: localDateTime(day(nextDay), '00:00'),
     price_max: Number.isFinite(selection.budget) ? selection.budget : undefined,

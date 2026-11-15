@@ -1,9 +1,3 @@
-/* Главная: ОДИН курай на canvas #kurai-bg.
- * Один стебель справа, до 92% высоты окна, зонтик из 13 лучей, листья крупнее.
- * Колышание от ветра: синусоида стебля и зонтика, амплитуда растёт к верхушке,
- * медленные порывы меняют амплитуду во времени. ~30 fps, DPR до 1.75,
- * пауза при скрытой вкладке, при prefers-reduced-motion — один статичный кадр.
- */
 (function () {
   'use strict';
   var canvas = document.getElementById('kurai-bg');
@@ -17,7 +11,6 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var W = 0, H = 0, rafId = null, last = 0;
 
-  // Ровно одно растение: один объект, без массива и без цикла создания растений.
   var plant = {
     rays: 13,
     leafCount: 5,
@@ -38,7 +31,6 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // Медленные порывы ветра: амплитуда плавно меняется во времени (периоды ~35 с и ~90 с).
   function gust(sec) {
     var g = 0.62 + 0.28 * Math.sin(sec * 0.18) + 0.16 * Math.sin(sec * 0.07 + 1.3);
     if (g < 0.35) g = 0.35;
@@ -46,7 +38,6 @@
     return g;
   }
 
-  // Смещение от ветра на высоте t (0 — основание, 1 — верхушка): амплитуда растёт к верхушке как t*t.
   function swayAt(t, sec, g) {
     return (16 * g * t * t * Math.sin(sec * 0.9 + t * 1.4)) +
            (6 * g * t * t * Math.sin(sec * 0.37 + 2.0));
@@ -61,7 +52,6 @@
     var topY = H - plantH;
     var i, t, x, y;
 
-    // Стебель: ломаная из 25 точек по синусоиде ветра.
     ctx.beginPath();
     for (i = 0; i <= 24; i++) {
       t = i / 24;
@@ -75,7 +65,6 @@
     ctx.lineJoin = 'round';
     ctx.stroke();
 
-    // Листья крупнее: длина 78-92 px, ширина до ~30 px, поочерёдно влево/вправо.
     var leafT = [0.18, 0.32, 0.46, 0.60, 0.74];
     for (i = 0; i < plant.leafCount; i++) {
       t = leafT[i];
@@ -93,7 +82,6 @@
       ctx.fill();
     }
 
-    // Зонтик из 13 лучей на верхушке, тоже колышется от ветра.
     var cx = baseX + swayAt(1, sec, g);
     var cy = topY;
     for (i = 0; i < plant.rays; i++) {
