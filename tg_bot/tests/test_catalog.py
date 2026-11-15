@@ -72,3 +72,30 @@ async def test_import_idempotency_persistence_and_unicode_search(database):
         assert result.items[0].sources == ["https://example.invalid/event/1"]
         assert await session.scalar(select(func.count()).select_from(Event)) == 1
         assert await session.scalar(select(func.count()).select_from(RawImport)) == 2
+
+
+@pytest.mark.asyncio
+async def test_row_isolation_rejection_and_audit_privacy(database):
+    async with database.sessions() as session:
+        invalid = event_row(title="bad", price_min=-1, user_email="private@example.invalid")
+        report = await ImporterService(session).import_bytes(
+            json.dumps(
+                [
+                    event_row(),
+                    invalid,
+                    event_row(title="Второй", source_url="https://example.invalid/2"),
+                ]
+            ).encode(),
+            "rows.json",
+            actor="private@example.invalid",
+        )
+        assert (report.added, report.rejected) == (2, 1)
+        assert report.errors[0]["row"] == 2
+        assert "private@" not in json.dumps(report.errors)
+        assert await session.scalar(select(func.count()).select_from(Event)) == 2
+        raw = list((await session.scalars(select(RawImport))).all())
+        assert len(raw) == 3 and raw[1].status == "rejected"
+        assert "user_email" not in raw[1].payload
+        audits = list((await session.scalars(select(AuditLog))).all())
+        assert len(audits) == 3
+        assert all(len(a.actor) == 64 and "private@" not in json.dumps(a.details) for a in audits)
