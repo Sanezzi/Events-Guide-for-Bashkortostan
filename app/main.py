@@ -329,3 +329,24 @@ async def submit_event(body: EventSubmission):
     if report.added != 1:
         raise HTTPException(409, "Событие уже есть в каталоге или на проверке")
     return ActionResult(id=identifier, success=True, message="Событие отправлено на модерацию.")
+
+
+class ChatInput(BaseModel):
+    session_id: str = Field(min_length=1, max_length=80)
+    message: str = Field(min_length=1, max_length=12000)
+    confirm_action: bool = False
+    confirmation_version: str | None = Field(default=None, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_confirmation(self):
+        if self.confirm_action and not self.confirmation_version:
+            raise ValueError("confirmation version is required")
+        return self
+
+
+@app.post("/api/chat", response_model=ChatResponse, tags=["chat"])
+async def chat(body: ChatInput, request: Request, response: Response):
+    identity = web_identity(request, response)
+    result = await app.state.dialogues.ask(identity, body.session_id, body.message,
+                                           body.confirmation_version if body.confirm_action else None)
+    return chat_result(result)
