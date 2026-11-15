@@ -403,3 +403,12 @@ class CultureAgentService:
                 raise ValueError("feedback_event_not_found")
         args = TOOL_MODELS[name].model_validate_json(json.dumps({**args.model_dump(mode="json"), **updates}))
         return self._propose(run, state, name, args)
+
+    async def handle_message(self, request: AgentRequest) -> AgentResponse:
+        response = await self._handle_message(request)
+        if self.trace_sink is not None:
+            try:
+                await self.trace_sink.save(response.trace.model_copy(deep=True))
+            except Exception as exc:
+                logger.error("Trace persistence failed: %s", type(exc).__name__)
+        return response
