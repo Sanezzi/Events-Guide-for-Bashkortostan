@@ -129,3 +129,85 @@ def make_demo_events(now: datetime | None = None) -> list[EventCard]:
                 dedup_key=f"demo-{city_index}-{index}", created_at=clock, updated_at=clock,
             ))
     return events
+
+
+class MockEventRepository:
+    """In-memory demo repository; public events/subscriptions/feedback are inspectable.
+
+    Returned cards and stored action arguments are deep copies. Public fixture
+    editing is intentional; callers should mutate events only for test setup.
+    """
+    def __init__(self, now: datetime | None = None, events: Iterable[EventCard] | None = None) -> None:
+        self.events: list[EventCard] = [event.model_copy(deep=True) for event in (
+            make_demo_events(now) if events is None else events
+        )]
+        self.subscriptions: list[SubscribeArgs] = []
+        self.feedback: list[FeedbackArgs] = []
+
+    async def search_events(self, query: SearchEventsArgs) -> SearchResult:
+        tokens = _tokens(query.text) if query.text else []
+        matches = []
+        for event in self.events:
+            if event.status != "опубликовано":
+                continue
+            if query.city is not None and _fold(event.city) != _fold(query.city):
+                continue
+            if query.category is not None and event.category != query.category:
+                continue
+            if query.date_from is not None and event.date_start < query.date_from:
+                continue
+            if query.date_to is not None and event.date_start > query.date_to:
+                continue
+            if query.price_max is not None and event.price_max > query.price_max:
+                continue
+            if query.is_free is not None and event.is_free != query.is_free:
+                continue
+            if query.age_limit is not None and event.age_limit > query.age_limit:
+                continue
+            duration = event.duration_min
+            if duration is None and event.date_end is not None:
+                duration = (event.date_end - event.date_start).total_seconds() / 60
+            if query.duration_max is not None and (duration is None or duration > query.duration_max):
+                continue
+            haystack = _fold(" ".join([
+                event.title, event.normalized_title, event.description, event.city,
+                event.venue, event.category, *event.tags,
+            ]))
+            # AND across meaningful tokens, substring per token. No evaluation,
+            # tool dispatch, instruction recognition or constraint overrides.
+            if query.text and (not tokens or not all(token in haystack for token in tokens)):
+                continue
+            matches.append(event)
+        matches.sort(key=lambda e: (e.date_start, e.price_max, str(e.id)))
+        return SearchResult(events=[event.model_copy(deep=True) for event in matches])
+
+    async def get_event(self, query: GetEventArgs) -> EventCard | None:
+        event = next((event for event in self.events if event.id == query.event_id), None)
+        return event.model_copy(deep=True) if event is not None else None
+
+    async def find_similar(self, query: FindSimilarArgs) -> SearchResult:
+        original = await self.get_event(GetEventArgs(event_id=query.event_id))
+        if original is None:
+            return SearchResult()
+        result = await self.search_events(SearchEventsArgs(
+            city=query.city or original.city, category=original.category,
+            date_from=query.date_from, date_to=query.date_to,
+        ))
+        return SearchResult(events=[event for event in result.events if event.id != query.event_id])
+
+    async def get_venue_schedule(self, query: VenueScheduleArgs) -> SearchResult:
+        result = await self.search_events(SearchEventsArgs(date_from=query.date_from, date_to=query.date_to))
+        return SearchResult(events=[event for event in result.events if _fold(event.venue) == _fold(query.venue)])
+
+    async def subscribe(self, query: SubscribeArgs) -> ActionResult:
+        action_id = uuid5(NAMESPACE_URL, "culture-demo/subscription/" + query.model_dump_json())
+        if query not in self.subscriptions:
+            self.subscriptions.append(query.model_copy(deep=True))
+        return ActionResult(id=action_id, success=True, message="ДЕМО: подписка сохранена в памяти; уведомления не отправляются.")
+
+    async def save_feedback(self, query: FeedbackArgs) -> ActionResult:
+        action_id = uuid5(NAMESPACE_URL, "culture-demo/feedback/" + query.model_dump_json())
+        if await self.get_event(GetEventArgs(event_id=query.event_id)) is None:
+            return ActionResult(id=action_id, success=False, message="Событие не найдено; обращение не сохранено.")
+        self.feedback.append(query.model_copy(deep=True))
+        return ActionResult(id=action_id, success=True, message="ДЕМО: обращение сохранено в памяти; организатору не отправлялось.")
