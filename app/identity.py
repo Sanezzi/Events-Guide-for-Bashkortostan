@@ -60,3 +60,37 @@ def web_identity(request: Request, response: Response) -> str:
 
 def bot_identity(user_id: str) -> str:
     return f"tg:{user_id}"
+
+
+@dataclass
+class Dialogue:
+    history: deque = field(default_factory=lambda: deque(maxlen=12))
+    touched: float = field(default_factory=time.monotonic)
+    lock: Lock = field(default_factory=Lock)
+
+
+class Dialogues:
+    def __init__(self, agent):
+        self.agent = agent
+        self.sessions = {}
+
+    async def ask(self, user_id, session_id, message, confirmation=None):
+        key = user_id, session_id
+        now = time.monotonic()
+        if len(self.sessions) >= 10000:
+            for old, state in list(self.sessions.items()):
+                if now - state.touched >= 3600 and not state.lock.locked():
+                    self.sessions.pop(old, None)
+            if key not in self.sessions and len(self.sessions) >= 10000:
+                raise HTTPException(429, "Сервис занят, попробуйте позже")
+        state = self.sessions.setdefault(key, Dialogue())
+        state.touched = now
+        async with state.lock:
+            reply = await self.agent.handle_message(AgentRequest(
+                session_id=session_id, user_id=user_id, message=message,
+                history=list(state.history), confirm_action=confirmation is not None,
+                confirmation_version=confirmation,
+            ))
+            state.history.extend((Message(role="user", content=message),
+                                  Message(role="assistant", content=reply.reply_text)))
+            return reply
