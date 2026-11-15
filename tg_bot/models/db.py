@@ -131,3 +131,26 @@ class UserSettings(Base):
     tg_user_id: Mapped[str] = mapped_column(String(32), primary_key=True)
     user_id = synonym("tg_user_id")
     lang: Mapped[str] = mapped_column(String(5), default="ru")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    user_id: Mapped[str] = mapped_column(String(128))
+    event_id: Mapped[UUID] = mapped_column(Uuid, index=True)
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class StoredTrace(Base):
+    __tablename__ = "agent_traces"
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    session_ref: Mapped[str] = mapped_column(String(128), index=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    value: Mapped[str] = mapped_column(String(128))
