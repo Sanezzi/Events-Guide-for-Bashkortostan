@@ -1,0 +1,55 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "user_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    },
+    "city": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "City",
+      "type": "string"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "enum": [
+            "концерт",
+            "спектакль",
+            "выставка",
+            "фестиваль",
+            "кино",
+            "экскурсия",
+            "другое"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category"
+    },
+    "period": {
+      "default": "weekly",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "title": "Period",
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "city"
+  ],
+  "title": "SubscribeArgs",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

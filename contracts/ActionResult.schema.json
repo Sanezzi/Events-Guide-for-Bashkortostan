@@ -1,0 +1,28 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "success": {
+      "title": "Success",
+      "type": "boolean"
+    },
+    "message": {
+      "maxLength": 12000,
+      "minLength": 1,
+      "title": "Message",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "success",
+    "message"
+  ],
+  "title": "ActionResult",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
