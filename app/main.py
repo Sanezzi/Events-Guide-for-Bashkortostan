@@ -389,3 +389,15 @@ async def index(request: Request):
         rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs())
         cards = discovery.catalog_html(rows)
     return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- catalog -->", cards, 1))
+
+
+@app.get("/event", response_class=HTMLResponse)
+async def event_page(request: Request, id: UUID | None = None):
+    event = await public_event(id) if id else None
+    html = (PORTAL if PORTAL.is_file() else FRONTEND / "event.html").read_text(encoding="utf-8")
+    canonical = discovery.root_url(request) + (discovery.event_path(event) if event else "/event")
+    title = f"{event.title} — {discovery.SITE_TITLE}" if event else discovery.SITE_TITLE
+    meta = discovery.metadata(title, event.description[:160] if event else discovery.DESCRIPTION, canonical,
+                              noindex=not event, structured=discovery.event_schema(event, canonical) if event else None)
+    detail = discovery.detail_html(event) if event else "Выберите событие в каталоге."
+    return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- event -->", detail, 1))
