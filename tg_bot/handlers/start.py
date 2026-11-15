@@ -93,3 +93,9 @@ async def send_long(target: Message | CallbackQuery, text: str, reply_markup=Non
         await respond(
             target, html(chunk), reply_markup=reply_markup if index == len(chunks) - 1 else None
         )
+
+
+async def show_menu(target, database, *, edit=False) -> None:
+    lang = await language(database, target.from_user.id)
+    text = t("bot.welcome", lang)
+    await respond(target, html(text), menu_keyboard(lang), edit=edit)
