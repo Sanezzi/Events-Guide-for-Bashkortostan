@@ -22,3 +22,11 @@ class BackendClient:
         response = await self.client.request(method, f"/internal/bot/{path}", **kwargs)
         response.raise_for_status()
         return response.json()
+
+    async def search(self, filters: SearchFilters):
+        return SearchResult.model_validate(await self.request("POST", "search",
+            json=filters.model_dump(mode="json", exclude_none=True)))
+
+    async def get_event(self, event_id: UUID):
+        result = await self.request("GET", f"events/{event_id}")
+        return EventOut.model_validate(result) if result else None
