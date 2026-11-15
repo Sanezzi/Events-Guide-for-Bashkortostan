@@ -79,3 +79,52 @@ def metadata(title, description, canonical, *, noindex=False, structured=None):
         data = json.dumps(structured, ensure_ascii=False).replace('<', '\\u003c')
         tags.append(f'<script type="application/ld+json">{data}</script>')
     return '\n'.join(tags)
+
+
+def event_schema(event, canonical):
+    data = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        'name': event.title,
+        'description': event.description,
+        'url': canonical,
+        'startDate': aware(event.date_start).isoformat(),
+        'eventStatus': 'https://schema.org/EventCancelled' if event.status == 'отменено' else 'https://schema.org/EventScheduled',
+        'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+        'location': {
+            '@type': 'Place',
+            'name': event.venue,
+            'address': {
+                '@type': 'PostalAddress',
+                'addressLocality': event.city,
+                'streetAddress': event.address,
+                'addressCountry': 'RU',
+            },
+        },
+    }
+    if event.date_end:
+        data['endDate'] = aware(event.date_end).isoformat()
+    ticket_url = safe_link(event.org_link)
+    if ticket_url and event.price_known and event.status != 'отменено':
+        data['offers'] = {
+            '@type': 'Offer' if event.price_min == event.price_max else 'AggregateOffer',
+            'url': ticket_url, 'priceCurrency': 'RUB',
+            **({'price': event.price_min} if event.price_min == event.price_max else {
+                'lowPrice': event.price_min, 'highPrice': event.price_max,
+            }),
+        }
+    return data
+
+
+def price_text(event):
+    if not event.price_known:
+        return 'Уточняйте у организатора'
+    if event.is_free or event.price_max == 0:
+        return 'Бесплатно'
+    if event.price_min == event.price_max:
+        return f'{event.price_min:g} ₽'
+    return f'{event.price_min:g} – {event.price_max:g} ₽'
+
+
+def event_time(date):
+    return aware(date).strftime('%d.%m.%Y, %H:%M')
