@@ -1,5 +1,3 @@
-"""Import structured events from organizer URLs into the moderation queue."""
-
 import argparse
 import asyncio
 import json
@@ -10,6 +8,8 @@ from app.catalog import Catalog, SOURCE_CODES
 from app.db_config import database_url
 from contour.parser import event_page_links, fetch_text, parse_event_page, source_link
 from tg_bot.models import Database
+
+CLI_DESCRIPTION = 'Import structured events from organizer URLs into the moderation queue.'
 
 
 def failure_reason(exc):
@@ -76,7 +76,7 @@ async def collect(urls, *, preview=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=CLI_DESCRIPTION)
     parser.add_argument("urls", nargs="*", help="Organizer event or listing URLs")
     parser.add_argument("--configured", action="store_true", help="Read URLs from contour/data/sources.json")
     parser.add_argument("--preview", action="store_true", help="Scan sources without importing")

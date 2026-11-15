@@ -1,4 +1,3 @@
-"""Extract event details from known organizer pages."""
 from __future__ import annotations
 import html, json, re, urllib.parse, urllib.request
 from datetime import datetime, timedelta
@@ -53,7 +52,7 @@ def parse_prices(text):
     nums = [float(x.replace(' ', '').replace(',', '.')) for x in re.findall(r'(\d[\d ]{1,7})\s*(?:₽|руб)', text or '')]
     nums = [n for n in nums if 0 < n <= 100000]
     if not nums:
-        return None  # unknown price: caller must NOT write 0 RUB
+        return None
     return (min(nums), max(nums), False)
 
 def parse_datetime(text, year=None):
@@ -82,8 +81,6 @@ def deterministic_id(source_url, title, dt):
     return str(uuid5(NAMESPACE_URL, source_url + '|' + fold(title) + '|' + dt.isoformat()))
 
 def build_fragment(*, title, city, venue, address, source_url, page_text, category='другое', tags=None, description=None, year=None):
-    """Build one fragment dict or return None. _verified is set only when
-    date, price AND age are all present in page_text (full match rule)."""
     dt = parse_datetime(page_text, year=year)
     if dt is None or dt <= datetime.now(TZ):
         return None
