@@ -154,3 +154,16 @@ def detail_html(event):
         f'<h1>{escape(event.title)}</h1><p>{escape(event.description)}</p>'
         f'<dl>{rows}</dl><p>{" ".join(links)}</p>'
     )
+
+
+def catalog_html(events):
+    return ''.join(
+        f'<article class="card"><div class="card-body"><span class="badge">{escape(event.category)}</span>'
+        f'<h3><a href="{event_path(event)}">{escape(event.title)}</a></h3>'
+        f'<time class="when" datetime="{aware(event.date_start).isoformat()}">{event_time(event.date_start)}</time>'
+        f'<div class="where">{escape(event.city)} · {escape(event.venue)}</div>'
+        f'<div class="price">{escape(price_text(event))} · {event.age_limit}+</div>'
+        f'<p class="desc">{escape(event.description)}</p>'
+        f'<div class="foot"><a class="btn" href="{event_path(event)}">Открыть</a></div></div></article>'
+        for event in events
+    )
