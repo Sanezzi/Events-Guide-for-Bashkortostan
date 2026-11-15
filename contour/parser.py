@@ -80,3 +80,36 @@ def slugify(s):
 
 def deterministic_id(source_url, title, dt):
     return str(uuid5(NAMESPACE_URL, source_url + '|' + fold(title) + '|' + dt.isoformat()))
+
+def build_fragment(*, title, city, venue, address, source_url, page_text, category='другое', tags=None, description=None, year=None):
+    """Build one fragment dict or return None. _verified is set only when
+    date, price AND age are all present in page_text (full match rule)."""
+    dt = parse_datetime(page_text, year=year)
+    if dt is None or dt <= datetime.now(TZ):
+        return None
+    prices = parse_prices(page_text)
+    age = parse_age(page_text)
+    verified = prices is not None and age is not None
+    if not verified:
+        return None
+    price_min, price_max, is_free = prices
+    dur = parse_duration(page_text)
+    item = {
+        'id': deterministic_id(source_url, title, dt),
+        'title': title.strip(),
+        'category': category if category in CATEGORIES else 'другое',
+        'tags': event_tags(title, description or "", category, age, is_free, tags or ()),
+        'date_start': dt.isoformat(),
+        'date_end': (dt + timedelta(minutes=dur)).isoformat() if dur else None,
+        'duration_min': dur,
+        'city': city, 'venue': venue, 'address': address,
+        'description': (description or title).strip()[:12000],
+        'price_min': price_min, 'price_max': price_max, 'is_free': is_free,
+        'age_limit': age,
+        'source_url': source_url,
+        'status': 'опубликовано',
+        'dedup_key': slugify(city) + '-' + dt.strftime('%Y-%m-%dT%H:%M') + '-' + slugify(venue) + '-' + slugify(title),
+        '_verified': bool(verified),
+    }
+    EventCard.model_validate_json(json.dumps({k: v for k, v in item.items() if k != '_verified'}, ensure_ascii=False))
+    return item
