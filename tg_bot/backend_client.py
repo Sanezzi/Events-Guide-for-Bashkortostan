@@ -53,3 +53,8 @@ class BackendClient:
     async def import_bytes(self, data, filename, *, actor):
         return ImportReport.model_validate(await self.request("POST", "import", content=data,
             params={"filename": filename, "actor": actor}))
+
+    async def ask(self, *, user_id, session_id, text, history, confirmation_version=None):
+        return AgentReply.model_validate(await self.request("POST", "agent", timeout=28, json={
+            "user_id": user_id, "session_id": session_id, "message": text,
+            "confirmation_version": confirmation_version}))
