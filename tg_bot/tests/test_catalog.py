@@ -284,3 +284,29 @@ async def test_reschedule_updates_stable_id_and_cancelled_state(database):
         assert record.date_start.day == 17
         assert (await repo.search(SearchFilters())).total == 0
         assert await session.scalar(select(func.count()).select_from(Event)) == 1
+
+
+@pytest.mark.asyncio
+async def test_periods_and_past_exclusion(database, monkeypatch):
+    import tg_bot.repositories.catalog_repo as catalog
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2099, 11, 14, 12, tzinfo=timezone.utc).astimezone(tz)
+
+    monkeypatch.setattr(catalog, "datetime", FixedDatetime)
+    async with database.sessions() as session:
+        await load(
+            session,
+            [
+                event_row(date_start="2099-11-14T18:00:00+05:00", date_end=None),
+                event_row(title="Tomorrow", date_start="2099-11-15T18:00:00+05:00", date_end=None),
+                event_row(title="Past", date_start="2099-11-13T18:00:00+05:00", date_end=None),
+            ],
+        )
+        repo = SqlCatalogRepository(session)
+        assert (await repo.search(SearchFilters(period="today"))).total == 1
+        assert (await repo.search(SearchFilters(period="tomorrow"))).total == 1
+        assert (await repo.search(SearchFilters(period="week"))).total == 2
+        assert (await repo.search(SearchFilters())).total == 2
