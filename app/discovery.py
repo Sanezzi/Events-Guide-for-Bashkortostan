@@ -215,3 +215,24 @@ async def sitemap(request: Request):
         if modified:
             ET.SubElement(entry, 'lastmod').text = aware(modified).isoformat()
     return xml_response(root, 'application/xml')
+
+
+@router.get('/rss.xml')
+async def rss(request: Request):
+    base = root_url(request)
+    rss_root = ET.Element('rss', version='2.0')
+    channel = ET.SubElement(rss_root, 'channel')
+    for key, value in (('title', SITE_TITLE), ('link', base + '/'), ('description', DESCRIPTION), ('language', 'ru')):
+        ET.SubElement(channel, key).text = value
+    events = publishable(await request.app.state.catalog.events())
+    for event in sorted(events, key=lambda item: aware(item.updated_at or item.created_at or item.date_start), reverse=True)[:50]:
+        item = ET.SubElement(channel, 'item')
+        title = f'Отменено: {event.title}' if event.status == 'отменено' else event.title
+        url = base + event_path(event)
+        summary = f'{event_time(event.date_start)} · {event.city} · {event.venue}. {event.description}'
+        for key, value in (('title', title), ('link', url), ('guid', url), ('description', escape(summary))):
+            ET.SubElement(item, key).text = value
+        published = event.updated_at or event.created_at
+        if published:
+            ET.SubElement(item, 'pubDate').text = format_datetime(aware(published).astimezone(timezone.utc), usegmt=True)
+    return xml_response(rss_root, 'application/rss+xml')
