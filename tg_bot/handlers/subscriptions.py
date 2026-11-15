@@ -45,3 +45,27 @@ async def show_subscriptions(target, database, *, edit=False, page=1, removed=No
         subscriptions_keyboard(lang, selected, page, total),
         edit=edit,
     )
+
+
+def create_router() -> Router:
+    router = Router(name="subscriptions")
+
+    @router.message(Command("subscriptions"))
+    async def list_command(message: Message, state: FSMContext, database):
+        await state.set_state(None)
+        await show_subscriptions(message, database)
+
+    @router.callback_query(F.data == "subscriptions")
+    async def list_callback(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        await state.set_state(None)
+        await show_subscriptions(query, database, edit=True)
+
+    @router.callback_query(F.data.startswith("subpage:"))
+    async def subscription_page(query: CallbackQuery, database):
+        await answer_callback(query)
+        try:
+            page = int(query.data.split(":", 1)[1])
+        except ValueError:
+            return
+        await show_subscriptions(query, database, edit=True, page=page)
