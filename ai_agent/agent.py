@@ -93,3 +93,24 @@ class CultureAgentService:
     def _prune(ledger: deque, now: float, window: float) -> None:
         while ledger and ledger[0][0] <= now - window:
             ledger.popleft()
+
+    async def _reserve(self, run: _Run, messages: list[dict], tool_defs: list) -> tuple[list, list]:
+        # UTF-8 bytes bound text token count conservatively; include protocol overhead.
+        input_bound = len(json.dumps([messages, tool_defs], ensure_ascii=False).encode("utf-8")) + 1024
+        amount = (input_bound * self.settings.input_usd_per_million +
+                  self.settings.max_output_tokens * self.settings.output_usd_per_million) / 1_000_000
+        key = (run.request.session_id, run.request.user_id)
+        async with self._budget_lock:
+            now = time.monotonic()
+            session = self._session_costs[key]
+            user = self._user_costs[run.request.user_id]
+            self._prune(user, now, _WINDOW)
+            limits = ((run.trace.cost_usd, self.settings.request_budget_usd),
+                      (sum(row[1] for row in session), self.settings.session_budget_usd),
+                      (sum(row[1] for row in user), self.settings.user_daily_budget_usd))
+            if any(limit <= 0 or spent + amount > limit for spent, limit in limits):
+                raise ValueError("budget_exceeded")
+            first, second = [now, amount], [now, amount]
+            session.append(first)
+            user.append(second)
+            return first, second
