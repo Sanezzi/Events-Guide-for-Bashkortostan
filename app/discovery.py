@@ -200,3 +200,18 @@ def indexnow_verification(verification_file: str):
 
 def xml_response(root, media_type):
     return Response(ET.tostring(root, encoding='utf-8', xml_declaration=True), media_type=media_type)
+
+
+@router.get('/sitemap.xml')
+async def sitemap(request: Request):
+    base = root_url(request)
+    root = ET.Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
+    for path in PUBLIC_PAGES:
+        ET.SubElement(ET.SubElement(root, 'url'), 'loc').text = base + path
+    for event in publishable(await request.app.state.catalog.events()):
+        entry = ET.SubElement(root, 'url')
+        ET.SubElement(entry, 'loc').text = base + event_path(event)
+        modified = event.updated_at or event.created_at
+        if modified:
+            ET.SubElement(entry, 'lastmod').text = aware(modified).isoformat()
+    return xml_response(root, 'application/xml')
