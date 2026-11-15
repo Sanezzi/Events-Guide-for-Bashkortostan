@@ -142,3 +142,23 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(agent_confirmation=None)
         await show_menu(query, database, edit=True)
+
+    @router.callback_query(F.data == "languages")
+    async def languages(query: CallbackQuery, database):
+        await answer_callback(query)
+        lang = await language(database, query.from_user.id)
+        await respond(query, html(t("bot.choose_language", lang)), language_keyboard(lang), edit=True)
+
+    @router.callback_query(F.data.startswith("lang:"))
+    async def set_language(query: CallbackQuery, database):
+        await answer_callback(query)
+        lang = query.data.split(":", 1)[1]
+        if lang not in {"ru", "ba", "en"}:
+            return
+        async with repository(database) as repo:
+            await repo.set_lang(str(query.from_user.id), lang)
+        await respond(
+            query, html(t("bot.language_saved", lang)), back_keyboard(lang, "languages"), edit=True
+        )
+
+    return router
