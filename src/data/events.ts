@@ -97,3 +97,27 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 export const json = (method: string, body: object): RequestInit => ({
   method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
 })
+
+export function params(filters: Filters, limit?: number, offset?: number) {
+  const query = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '' && key !== 'language') query.set(key, String(value))
+  }
+  if (limit) query.set('limit', String(limit))
+  if (offset) query.set('offset', String(offset))
+  return query
+}
+
+export async function getEvents(filters: Filters, limit = 8, offset = 0, signal?: AbortSignal): Promise<EventResults> {
+  if (!filters.language) return api('/api/v1/events?' + params(filters, limit, offset), { signal })
+  const loaded: EventCard[] = []
+  let cursor = 0
+  let result: EventResults
+  do {
+    result = await api('/api/v1/events?' + params(filters, 100, cursor), { signal })
+    if (!result.events.length) break
+    loaded.push(...result.events.filter(e => matchesLanguage(e, filters.language)))
+    cursor += result.events.length
+  } while (cursor < result.total)
+  return { events: loaded.slice(offset, offset + limit), total: loaded.length, explanation: result.explanation }
+}

@@ -62,3 +62,18 @@ export function criteria(filters: Filters): string[] {
     filters.language === 'ba' && 'Башҡорт телендә',
   ].filter((value): value is string => Boolean(value))
 }
+
+export function readFilters(): Filters {
+  const query = new URLSearchParams(location.search)
+  const filters: Filters = {}
+  for (const key of ['text', 'city', 'venue', 'category', 'period', 'date_from', 'date_to', 'sort', 'language'] as const) {
+    const value = query.get(key)
+    if (value) Object.assign(filters, { [key]: value })
+  }
+  for (const key of ['age_limit', 'price_max'] as const) {
+    const value = query.get(key)
+    if (value !== null && value.trim() && Number.isFinite(Number(value))) filters[key] = Number(value)
+  }
+  if (query.get('is_free') === 'true') filters.is_free = true
+  return filters
+}
