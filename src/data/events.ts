@@ -84,3 +84,16 @@ export function safeUrl(value?: string | null) {
 export function matchesLanguage(event: EventCard, language?: string) {
   return !language || event.language?.split('/').includes(language) === true
 }
+
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, init)
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null)
+    throw new Error(payload?.error?.message || (typeof payload?.detail === 'string' && payload.detail) || 'Сервис временно недоступен. Попробуйте ещё раз.')
+  }
+  return response.json() as Promise<T>
+}
+
+export const json = (method: string, body: object): RequestInit => ({
+  method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+})
