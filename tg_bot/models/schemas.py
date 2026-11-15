@@ -207,3 +207,11 @@ class ImportReport(BaseModel):
     rejected: int = 0
     unchanged: int = 0
     errors: list[dict] = Field(default_factory=list)
+
+
+class AgentReply(BaseModel):
+    text: str
+    event_ids: list[UUID] = Field(default_factory=list)
+    clarification: str | None = None
+    confirmation_version: str | None = None
+    is_fallback: bool = False
