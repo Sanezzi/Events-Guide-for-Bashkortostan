@@ -412,3 +412,117 @@ class CultureAgentService:
             except Exception as exc:
                 logger.error("Trace persistence failed: %s", type(exc).__name__)
         return response
+
+    async def _handle_message(self, request: AgentRequest) -> AgentResponse:
+        now = datetime.now(self._timezone)
+        run = _Run(request, now, AgentTrace(request=request.model_dump(mode="json")))
+        key = (request.session_id, request.user_id)
+        # Evict idle dialogue state and empty rolling ledgers opportunistically.
+        clock = time.monotonic()
+        for old_key, old in list(self._sessions.items()):
+            if clock - old.touched > _WINDOW and not old.lock.locked() and not old.active:
+                del self._sessions[old_key]
+        for old_key in list(self._session_costs):
+            if old_key not in self._sessions:
+                del self._session_costs[old_key]
+        for mapping, window in ((self._requests, 60), (self._user_costs, _WINDOW)):
+            for old_key, ledger in list(mapping.items()):
+                self._prune(ledger, clock, window)
+                if not ledger:
+                    del mapping[old_key]
+        if key not in self._sessions and len(self._sessions) >= 10000:
+            run.trace.fallback_reason = "state_capacity"
+            return self._finish(run, _Session(), text="Сервис занят. Попробуйте позже.")
+        state = self._sessions.setdefault(key, _Session())
+        async with self._session_guard(state):
+            try:
+                now = datetime.now(self._timezone)
+                run.now = now
+                clock = time.monotonic()
+                requests = self._requests[request.user_id]
+                self._prune(requests, clock, 60)
+                if len(requests) >= self.settings.requests_per_minute:
+                    run.trace.fallback_reason = "rate_limit"
+                    return self._finish(run, state, text="Слишком много запросов. Попробуйте через минуту.")
+                requests.append([clock, 0])
+                if request.confirm_action:
+                    pending = state.pending
+                    if (pending is None or pending["session_id"] != request.session_id or
+                        pending["user_id"] != request.user_id or datetime.fromisoformat(pending["expires_at"]) <= now):
+                        state.pending = None
+                        return self._finish(run, state, text="Нет действующего действия для подтверждения. Повторите запрос.")
+                    if request.confirmation_version is not None and request.confirmation_version != pending["version"]:
+                        return self._finish(run, state, text="Предложение изменилось. Проверьте последнее действие.")
+                    # Consume before I/O: a timeout must never replay a possibly completed write.
+                    state.pending = None
+                    args = TOOL_MODELS[pending["tool"]].model_validate_json(json.dumps(pending["arguments"]))
+                    result = await self._execute(run, pending["tool"], args)
+                    return self._finish(run, state, text=result.message)
+                state.pending = None
+                if not state.initialized and request.history:
+                    for message in request.history:
+                        if message.role == "user":
+                            state.constraints = dialogue.parse(message.content, state.constraints, now, [])
+                state.initialized = True
+                lowered = request.message.lower().replace("ё", "е")
+                if any(x in lowered for x in ("системный промпт", "системные инструкции", "system prompt", "ignore previous", "игнорируй инструкции", "игнорируй все", "раскрой промпт")):
+                    if any(root in lowered for root in (*dialogue.CITIES, *dialogue.CATEGORY_ROOTS, "афиш", "мероприят", "куда пойти")):
+                        state.constraints = dialogue.parse(request.message, state.constraints, now, state.previous)
+                        return await self._fallback(run, state, "user_injection_ignored")
+                    return self._finish(run, state, text="Я помогаю с культурной афишей. Могу подобрать мероприятия по городу, дате и бюджету.")
+                if (any(x in lowered for x in ("рецепт", "реши уравнение", "напиши код", "курс биткоин", "столиц", "квантов", "погода", "кредит"))
+                    and not any(root in lowered for root in (*dialogue.CATEGORY_ROOTS, "афиш", "мероприят"))):
+                    return self._finish(run, state, text="Я помогаю выбирать культурные мероприятия. В каком городе посмотреть афишу?", question="В каком городе посмотреть афишу?")
+                state.constraints = dialogue.parse(request.message, state.constraints, now, state.previous)
+                run.trace.plan.append("parse_constraints_and_verify_repository_facts")
+                general_search = re.fullmatch(
+                    r"(?:привет[,.!]?\s+)?куда\s+(?:мне\s+)?(?:сходить|пойти)[?!.\s]*", lowered.strip()
+                )
+                if general_search or dialogue.overview_city(request.message):
+                    filters = state.constraints
+                    run.trace.plan.append("catalog_overview")
+                    await self._execute(run, "search_events", filters.query())
+                    if filters.city is not None:
+                        cards = self._select(run, state, list(run.records.values()))
+                    else:
+                        eligible = sorted((event for event in run.records.values()
+                                           if dialogue.eligible(event, filters, run.now)),
+                                          key=lambda event: (event.date_start, event.price_max))
+                        by_city = {}
+                        for event in eligible:
+                            by_city.setdefault(event.city, event)
+                        cards = list(by_city.values())[:5]
+                    if cards:
+                        return self._finish(run, state, cards)
+                    return await self._finish_empty_search(run, state)
+                if state.constraints.question:
+                    return self._finish(run, state, text=state.constraints.question, question=state.constraints.question)
+                direct = dialogue.UUID_RE.search(request.message)
+                if direct and not any(word in request.message.lower() for word in ("похож", "отзыв", "обращен", "подпис")):
+                    await self._execute(run, "get_event", GetEventArgs(event_id=UUID(direct[0])))
+                    card = run.records.get(UUID(direct[0]))
+                    if card is None:
+                        return self._finish(run, state, text="Событие не найдено в доступной афише.")
+                    if card.status == "отменено":
+                        return self._finish(run, state, text=f"{card.title}: мероприятие отменено.")
+                    if not dialogue.eligible(card, state.constraints, now):
+                        return self._finish(run, state, text="Событие найдено, но не подходит под текущие условия или уже прошло.")
+                    return self._finish(run, state, [card])
+                if not self.settings.api_key.strip():
+                    if any(word in lowered for word in ("подпис", "подпиш", "уведомл")):
+                        if not state.constraints.city:
+                            question = "На какой город оформить подписку?"
+                            return self._finish(run, state, text=question, question=question)
+                        period = "daily" if "ежеднев" in lowered else "monthly" if "ежемесяч" in lowered else "weekly"
+                        return self._propose(run, state, "subscribe", SubscribeArgs(
+                            user_id=request.user_id, city=state.constraints.city,
+                            category=state.constraints.category, period=period,
+                        ))
+                    return await self._fallback(run, state, "api_key_missing")
+                return await self._llm(run, state)
+            except (OpenAIError, TimeoutError) as exc:
+                return await self._fallback(run, state, type(exc).__name__)
+            except Exception as exc:
+                logger.warning("Culture agent recovered from %s", type(exc).__name__)
+                reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+                return await self._fallback(run, state, reason or type(exc).__name__)
