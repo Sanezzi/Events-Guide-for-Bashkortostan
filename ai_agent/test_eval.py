@@ -331,3 +331,20 @@ async def evaluate(include_adversarial: bool = False) -> dict:
     report["summary"] = {"control_count": len(report["controls"]), "passed": sum(r["passed"] for r in rows),
         "failed": sum(not r["passed"] for r in rows), "total": len(rows)}
     return report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--report", type=Path, help="Optional JSON output; default prints only and writes no files")
+    parser.add_argument("--adversarial", action="store_true", help="Add separate provider/error/limit cases")
+    args = parser.parse_args()
+    report = asyncio.run(evaluate(args.adversarial))
+    output = json.dumps(report, ensure_ascii=False, indent=2)
+    if args.report:
+        args.report.write_text(output + "\n", encoding="utf-8")
+    print(output)
+    return 1 if report["summary"]["failed"] else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
