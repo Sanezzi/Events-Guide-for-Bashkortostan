@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Открытая экскурсия",
+    "category": "экскурсия",
+    "city": "Уфа",
+    "venue": "Учебная площадка",
+    "address": "Пример адреса",
+    "description": "Пример карточки для импорта",
+    "date_start": "2030-06-01T13:00:00+05:00",
+    "date_end": "2030-06-01T14:00:00+05:00",
+    "price_min": 0,
+    "price_max": 0,
+    "age_limit": 6,
+    "source_url": "https://example.org/event",
+    "source_type": "manual",
+    "status": "черновик"
+  }
+]
