@@ -209,3 +209,19 @@ async def test_csv_import_with_tags_and_row_rejection(database):
         assert (await ImporterService(session).import_bytes(b"bad", "events.json")).errors[0][
             "code"
         ] == "invalid_file"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("changed_key", ["source_hash", "dedup_key"])
+async def test_unique_source_hash_and_dedup_database_constraints(database, changed_key):
+    values = EventInput.model_validate(event_row()).model_dump(exclude={"id"})
+    async with database.sessions() as session:
+        session.add(Event(**values))
+        await session.commit()
+        duplicate = dict(values)
+        duplicate[changed_key] = "0" * 64
+        with pytest.raises(IntegrityError):
+            async with session.begin_nested():
+                session.add(Event(**duplicate))
+                await session.flush()
+        assert await session.scalar(select(func.count()).select_from(Event)) == 1
