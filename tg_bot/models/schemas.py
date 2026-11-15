@@ -199,3 +199,11 @@ class SearchResult(BaseModel):
     page: int
     page_size: int
     explanation: str | None = None
+
+
+class ImportReport(BaseModel):
+    added: int = 0
+    updated: int = 0
+    rejected: int = 0
+    unchanged: int = 0
+    errors: list[dict] = Field(default_factory=list)
