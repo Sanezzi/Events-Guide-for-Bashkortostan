@@ -163,3 +163,35 @@ def event_page_links(raw, page_url):
     parser = ListingLinks(page_url)
     parser.feed(raw)
     return [url for url in parser.links if url.rstrip("/") != page_url.rstrip("/")][:30]
+
+
+def structured_items(value):
+    if isinstance(value, list):
+        for item in value:
+            yield from structured_items(item)
+    elif isinstance(value, dict):
+        yield value
+        for key in ("@graph", "mainEntity", "itemListElement", "item", "subEvent"):
+            if key in value:
+                yield from structured_items(value[key])
+
+
+def parse_event_page(raw, page_url, *, now=None):
+    now = now or datetime.now(TZ)
+    categories = {"TheaterEvent": "спектакль", "MusicEvent": "концерт",
+                  "ExhibitionEvent": "выставка", "ScreeningEvent": "кино", "Festival": "фестиваль"}
+    output = []
+    for block in re.findall(r'<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script\s*>',
+                            raw, flags=re.I | re.S):
+        try:
+            items = json.loads(block)
+        except ValueError:
+            continue
+        for item in structured_items(items):
+            try:
+                event = structured_event(item, page_url, now, categories)
+            except (TypeError, ValueError, AttributeError, KeyError, OverflowError):
+                continue
+            if event is not None:
+                output.append(event)
+    return list({event["id"]: event for event in output}.values())
