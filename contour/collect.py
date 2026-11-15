@@ -46,3 +46,30 @@ async def scan_source(url, semaphore=None):
         else:
             events.extend(parse_event_page(page, child))
     return list({row["id"]: row for row in events}.values()), 1 + len(children), errors
+
+
+async def collect(urls, *, preview=False):
+    database = None if preview else Database(database_url())
+    catalog = Catalog(database) if database is not None else None
+    failed = False
+    semaphore = asyncio.Semaphore(6)
+    sources = list(dict.fromkeys(urls))
+    try:
+        scans = await asyncio.gather(*(scan_source(url, semaphore) for url in sources))
+        for url, (events, pages, errors) in zip(sources, scans):
+            result = {"source": url, "pages_attempted": pages, "found": len(events), "fetch_errors": errors}
+            if catalog is not None and events:
+                for row in events:
+                    row["source_type"] = SOURCE_CODES[row["source_type"]]
+                    for field in ("created_at", "updated_at", "source_hash", "dedup_key"):
+                        row.pop(field, None)
+                report = await catalog.import_file(json.dumps(events, ensure_ascii=False).encode(),
+                                                   "source.json", "organizer-page", preserve_reviewed=True)
+                result["import"] = report.model_dump()
+                failed = failed or bool(report.rejected)
+            print(json.dumps(result, ensure_ascii=False), flush=True)
+            failed = failed or bool(errors)
+    finally:
+        if database is not None:
+            await database.close()
+    return int(failed)
