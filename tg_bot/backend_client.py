@@ -58,3 +58,12 @@ class BackendClient:
         return AgentReply.model_validate(await self.request("POST", "agent", timeout=28, json={
             "user_id": user_id, "session_id": session_id, "message": text,
             "confirmation_version": confirmation_version}))
+
+
+@asynccontextmanager
+async def repository(database):
+    if isinstance(database, BackendClient):
+        yield database
+    else:
+        async with database.sessions() as session:
+            yield SqlCatalogRepository(session)
