@@ -126,3 +126,16 @@ def dedup(items):
 def collect_official_page(url, city, venue, address, title, **kw):
     text = strip_html(fetch_text(url))
     return build_fragment(title=title, city=city, venue=venue, address=address, source_url=url, page_text=text, **kw)
+
+
+def source_link(base, link):
+    if not isinstance(link, str) or not link.strip():
+        return None
+    try:
+        url = urllib.parse.urlsplit(urllib.parse.urljoin(base, link.strip()))
+        host = url.hostname
+    except ValueError:
+        return None
+    if url.scheme not in {"http", "https"} or not host or url.username or url.password:
+        return None
+    return url._replace(fragment="").geturl()
