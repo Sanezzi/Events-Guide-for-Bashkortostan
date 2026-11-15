@@ -423,3 +423,16 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(filters={**data.get("filters", {}), "page": number})
         await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.callback_query(F.data.startswith(("event:", "open-event:", "agent-event:", "agent-summary:")))
+    async def event(query: CallbackQuery, state: FSMContext, database, settings=None):
+        await answer_callback(query)
+        await state.set_state(None)
+        screen, identifier = query.data.split(":", 1)
+        try:
+            event_id = UUID(identifier)
+        except ValueError:
+            lang = await language(database, query.from_user.id)
+            await respond(query, html(t("bot.not_found", lang)), back_keyboard(lang), edit=True)
+            return
+        await show_event(query, database, event_id, settings, screen=screen, edit=True)
