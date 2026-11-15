@@ -226,3 +226,29 @@ async def similar_events(event_id: UUID, city: str | None = Query(None, max_leng
     card = await public_event(event_id)
     rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs(city=city or card.city, category=card.category), page_size=6)
     return [row for row in rows if row.id != event_id][:5]
+
+
+@app.get("/api/v1/cities", tags=["events"])
+@app.get("/api/v1/categories", tags=["events"])
+async def dictionary(request: Request):
+    name = request.url.path.rsplit("/", 1)[-1]
+    field = {"cities": "city", "categories": "category"}[name]
+    rows = await app.state.catalog.events(status="опубликовано")
+    return JSONResponse({name: sorted({getattr(row, field) for row in rows})},
+                        headers={"Cache-Control": "public, max-age=300"})
+
+
+@app.get("/api/v1/venues", tags=["events"])
+async def venues(city: str | None = Query(None, max_length=150)):
+    async with app.state.database.sessions() as session:
+        values = await SqlCatalogRepository(session).venues(city)
+    return JSONResponse({"venues": values}, headers={"Cache-Control": "public, max-age=30"})
+
+
+@app.get("/api/v1/venue-schedule", response_model=list[EventCard], tags=["events"])
+async def venue_schedule(venue: str = Query(..., min_length=1, max_length=300), date_from: datetime | None = None, date_to: datetime | None = None):
+    rows, _, _ = await app.state.catalog.filtered(SearchEventsArgs(
+        venue=venue, date_from=aware(date_from) if date_from else None,
+        date_to=aware(date_to) if date_to else None,
+    ), page_size=100)
+    return rows
