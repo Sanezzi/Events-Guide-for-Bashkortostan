@@ -85,3 +85,19 @@ class EventCard(StrictModel):
         if self.is_free != (self.price_min == 0 and self.price_max == 0):
             raise ValueError("is_free must agree with both prices being zero")
         return self
+
+
+class Message(StrictModel):
+    role: Literal["user", "assistant"]
+    content: LongText
+
+
+class AgentRequest(StrictModel):
+    """Callers send at least the last five turns when available; cold starts are valid."""
+    session_id: Identifier
+    user_id: Identifier
+    message: LongText
+    history: list[Message] = Field(default_factory=list, max_length=40,
+        description="Last at least five messages when available; fewer allowed for a new dialogue.")
+    confirm_action: bool = False
+    confirmation_version: Identifier | None = None
