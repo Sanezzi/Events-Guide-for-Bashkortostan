@@ -122,3 +122,20 @@ async def send_notifications(bot, backend):
         except Exception as exc:
             logger.warning("notification_cycle_failed", extra={"error_type": type(exc).__name__})
         await asyncio.sleep(300)
+
+
+def main() -> None:
+    configure_logging()
+    try:
+        asyncio.run(run())
+    except KeyboardInterrupt:
+        logger.info("shutdown", extra={"event": "shutdown"})
+    except Exception as exc:
+        logger.error(
+            "startup_failed", extra={"event": "startup_failed", "error_type": type(exc).__name__}
+        )
+        raise SystemExit(1) from None
+
+
+if __name__ == "__main__":
+    main()
