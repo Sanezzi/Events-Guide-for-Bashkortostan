@@ -188,3 +188,11 @@ def test_shared_catalog_import_moderation_and_agent(client):
     assert client.post("/api/v1/admin/import", headers=admin,
                        files={"file": ("events.json", json.dumps([event]))}).json()["updated"] == 1
     assert client.get(f"/api/v1/events/{event_id}").json()["status"] == "отменено"
+
+
+def test_api_errors_widget_and_service_auth(client):
+    assert client.get("/api/v1/events?limit=0").json()["code"] == "INVALID_REQUEST"
+    assert client.post("/internal/bot/search", json={}).status_code == 401
+    widget = client.get("/widget")
+    assert "X-Frame-Options" not in widget.headers
+    assert "frame-ancestors 'self'" not in widget.headers["Content-Security-Policy"]
