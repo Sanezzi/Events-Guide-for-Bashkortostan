@@ -257,3 +257,30 @@ async def test_agent_timeout_errors_and_unknown_ids_fall_back(database):
         assert (
             await BotService(repo, Good()).ask("1", "s", "x", ["1", "2", "3", "4", "5"])
         ).clarification == "Какой город?"
+
+
+@pytest.mark.asyncio
+async def test_reschedule_updates_stable_id_and_cancelled_state(database):
+    event_id = str(uuid4())
+    async with database.sessions() as session:
+        assert (await load(session, [event_row(id=event_id)])).added == 1
+        report = await load(
+            session,
+            [
+                event_row(
+                    id=event_id,
+                    date_start="2099-11-17T18:00:00+05:00",
+                    date_end="2099-11-17T19:30:00+05:00",
+                    status="отменено",
+                )
+            ],
+        )
+        assert report.updated == 1
+        repo = SqlCatalogRepository(session)
+        from uuid import UUID
+
+        record = await repo.get_event(UUID(event_id))
+        assert record.status == "отменено"
+        assert record.date_start.day == 17
+        assert (await repo.search(SearchFilters())).total == 0
+        assert await session.scalar(select(func.count()).select_from(Event)) == 1
