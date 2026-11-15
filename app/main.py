@@ -278,3 +278,15 @@ async def unsubscribe(identifier: UUID, request: Request, response: Response):
             await app.state.catalog.unsubscribe(owner, row.id)
             return {"message": "Подписка удалена."}
     raise HTTPException(404, "Подписка не найдена")
+
+
+@app.post("/api/v1/feedback", response_model=ActionResult, tags=["events"])
+async def feedback(body: FeedbackInput, request: Request, response: Response):
+    if body.website:
+        raise HTTPException(422, "Не удалось проверить форму")
+    if not body.text.strip():
+        raise HTTPException(422, "Введите текст обращения")
+    identifier = await app.state.catalog.feedback(web_identity(request, response), body.event_id, body.text.strip())
+    if not identifier:
+        raise HTTPException(404, "Событие не найдено")
+    return ActionResult(id=identifier, success=True, message="Обращение сохранено для модератора.")
