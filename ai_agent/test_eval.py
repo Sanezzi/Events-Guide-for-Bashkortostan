@@ -82,3 +82,46 @@ class ScriptedProvider:
                 "message": {"role": "assistant", **step},
                 "finish_reason": "tool_calls" if step.get("tool_calls") else "stop"}],
             "usage": {"prompt_tokens": 30, "completion_tokens": 10, "total_tokens": 40}})
+
+
+class Scenario:
+    def __init__(self, name: str):
+        self.name = name
+        self.repo = MockEventRepository(now=NOW)
+        self.provider: ScriptedProvider | None = None
+        self.responses: list[AgentResponse] = []
+        self.service: CultureAgentService | None = None
+
+    def start(self, steps: list[dict | int | str] | None = None, **settings: Any) -> None:
+        if steps is not None:
+            self.provider = ScriptedProvider(steps)
+        self.service = CultureAgentService(self.repo, AgentSettings(
+            api_key="offline-placeholder" if steps is not None else "", **settings),
+            client=self.provider.client if self.provider else None)
+
+    async def ask(self, text: str, confirm: bool = False) -> AgentResponse:
+        check(self.service is not None, "Scenario service was not started")
+        response = await self.service.handle_message(AgentRequest(
+            session_id=self.name, user_id="eval-user", message=text, confirm_action=confirm))
+        check(AgentResponse.model_validate_json(response.model_dump_json()) == response,
+              "Response JSON round-trip failed")
+        check(bool(response.reply_text.strip()), "Empty answer")
+        check(len(response.trace.tool_calls) <= 5, "Tool execution cap exceeded")
+        check({e.id for e in response.events} <= set(response.trace.event_ids), "Recommended IDs absent from trace")
+        check(set(response.trace.event_ids) <= {e.id for e in self.repo.events}, "Trace contains invented IDs")
+        for event in response.events:
+            check(event.status == "опубликовано", "Unpublished recommendation")
+            check(any(event == source for source in self.repo.events), "Invented event facts")
+        self.responses.append(response)
+        return response
+
+    async def close(self) -> None:
+        if self.service:
+            await self.service.aclose()
+        if self.provider:
+            await self.provider.client.close()
+
+
+def city_events(response: AgentResponse, city: str = "Стерлитамак") -> None:
+    check(bool(response.events), "Expected at least one matching event")
+    check(all(e.city == city for e in response.events), "City constraint lost")
