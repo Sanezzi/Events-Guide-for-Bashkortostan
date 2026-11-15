@@ -52,3 +52,10 @@ def import_reason(error: dict, lang: str) -> str:
 
 class ImportFlow(StatesGroup):
     document = State()
+
+
+class LimitedBuffer(BytesIO):
+    def write(self, data):
+        if self.tell() + len(data) > MAX_IMPORT_BYTES:
+            raise ValueError("import exceeds size limit")
+        return super().write(data)
