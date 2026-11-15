@@ -41,3 +41,40 @@ def test_listing_discovers_local_event_pages_only():
     assert event_page_links(raw, "https://theatre.example/afisha") == [
         "https://theatre.example/afisha/skazka"
     ]
+
+
+@pytest.mark.asyncio
+async def test_collection_walks_links_when_listing_already_has_an_event(monkeypatch):
+    start = (datetime.now(TZ) + timedelta(days=2)).isoformat()
+    listing = "https://theatre.example/afisha/"
+    first = listing + "first"
+    second = listing + "second"
+    broken = listing + "broken"
+
+    def card(title, url):
+        payload = {
+            "@type": "TheaterEvent", "name": title, "startDate": start,
+            "url": url, "isAccessibleForFree": True,
+            "location": {"name": "Театр", "address": {
+                "addressLocality": "Стерлитамак", "streetAddress": "ул. Ленина, 1"}},
+        }
+        return f'<script type="application/ld+json">{json.dumps(payload)}</script>'
+
+    pages = {
+        listing: card("Спектакль 0+", first) + "".join(
+            f'<a href="{url}">Карточка</a>' for url in (first, second, broken)
+        ),
+        first: card("Спектакль 0+", first),
+        second: card("Сказка 6+", second),
+    }
+
+    def fetch(url):
+        if url == broken:
+            raise TimeoutError()
+        return pages[url]
+
+    monkeypatch.setattr(collect, "fetch_text", fetch)
+    events, scanned, errors = await collect.scan_source(listing)
+    assert {row["source_url"] for row in events} == {first, second}
+    assert scanned == 4
+    assert errors == [{"url": broken, "error": "timeout"}]
