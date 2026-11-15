@@ -41,3 +41,28 @@ async def answer_callback(query: CallbackQuery, text: str | None = None) -> None
     except (TelegramBadRequest, TelegramForbiddenError, TelegramNetworkError):
         # Expired callbacks are normal; never log update bodies or user identifiers.
         return
+
+
+async def respond(
+    target: Message | CallbackQuery, text: str, reply_markup=None, *, edit: bool = False
+) -> None:
+    message = target.message if isinstance(target, CallbackQuery) else target
+    if not isinstance(message, Message):
+        return
+    kwargs = dict(parse_mode="HTML", link_preview_options={"is_disabled": True})
+    if edit:
+        try:
+            await message.edit_text(text, reply_markup=reply_markup, **kwargs)
+            return
+        except TelegramBadRequest as exc:
+            if "message is not modified" in str(exc).lower():
+                return
+        except TelegramForbiddenError:
+            return
+    try:
+        await message.answer(text, reply_markup=reply_markup, **kwargs)
+    except TelegramRetryAfter as exc:
+        if exc.retry_after > 30:
+            raise
+        await asyncio.sleep(exc.retry_after)
+        await message.answer(text, reply_markup=reply_markup, **kwargs)
