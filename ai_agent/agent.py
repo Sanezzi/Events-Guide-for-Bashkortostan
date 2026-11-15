@@ -327,3 +327,39 @@ class CultureAgentService:
         else:
             summary = f"Обращение по событию {args.event_id}: {args.text}"
         return self._finish(run, state, text=summary + " Подтвердите действие перед сохранением.", pending=dict(pending))
+
+    async def _llm(self, run: _Run, state: _Session) -> AgentResponse:
+        messages = [{"role": "system", "content": prompts.system_prompt(run.now)}]
+        messages.extend(message.model_dump() for message in run.request.history)
+        messages.append({"role": "user", "content": run.request.message})
+
+        for attempt in range(2):
+            response = await self._completion(run, messages)
+            calls = response.choices[0].message.tool_calls or []
+            if len(calls) > 4:
+                raise ValueError("tool_limit")
+            try:
+                tools = self._validated_calls(calls, state)
+            except ValidationError:
+                reason = "invalid_tool_arguments"
+            else:
+                if tools:
+                    break
+                reason = "no_verified_retrieval"
+            if attempt:
+                raise ValueError(reason)
+            run.trace.plan.append("repair_model_tool_call")
+            messages.append({"role": "system", "content":
+                "Предыдущий ответ не удалось разобрать. Вызови подходящий инструмент "
+                "с полным JSON аргументов. Для поиска используй search_events. "
+                "Оставь необязательные параметры пустыми, если их нет в запросе."})
+
+        for name, args in tools:
+            if name in _MUTATIONS:
+                return await self._propose_model_action(run, state, name, args)
+            await self._execute(run, name, args)
+
+        cards = self._select(run, state, list(run.records.values()))
+        if not cards:
+            return await self._finish_empty_search(run, state)
+        return self._finish(run, state, cards)
