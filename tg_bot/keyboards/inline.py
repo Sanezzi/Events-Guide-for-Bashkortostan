@@ -73,3 +73,24 @@ def external_url(value: object) -> str | None:
         )
     except ValueError:
         return None
+
+
+def menu_keyboard(lang: str) -> InlineKeyboardMarkup:
+    rows = [
+        [button("bot.agent", lang, "agent")],
+        [button("bot.catalog", lang, "catalog"), button("bot.subscriptions", lang, "subscriptions")],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def language_keyboard(lang: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang:ru"),
+                InlineKeyboardButton(text="🟢 Башҡортса", callback_data="lang:ba"),
+                InlineKeyboardButton(text="🇬🇧 English", callback_data="lang:en"),
+            ],
+            back_row(lang),
+        ]
+    )
