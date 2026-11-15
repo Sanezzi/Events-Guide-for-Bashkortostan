@@ -1,0 +1,495 @@
+{
+  "$defs": {
+    "AgentTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": true,
+          "title": "Request",
+          "type": "object"
+        },
+        "plan": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Plan",
+          "type": "array"
+        },
+        "tool_calls": {
+          "items": {
+            "$ref": "#/$defs/ToolCallTrace"
+          },
+          "title": "Tool Calls",
+          "type": "array"
+        },
+        "event_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "latency_ms": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Latency Ms",
+          "type": "number"
+        },
+        "tokens_input": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tokens Input",
+          "type": "integer"
+        },
+        "tokens_output": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tokens Output",
+          "type": "integer"
+        },
+        "total_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Total Tokens",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "cost_estimated": {
+          "default": true,
+          "title": "Cost Estimated",
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Reason"
+        }
+      },
+      "title": "AgentTrace",
+      "type": "object"
+    },
+    "EventCard": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "normalized_title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Normalized Title",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "концерт",
+            "спектакль",
+            "выставка",
+            "фестиваль",
+            "кино",
+            "экскурсия",
+            "другое"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 40,
+          "title": "Tags",
+          "type": "array"
+        },
+        "date_start": {
+          "format": "date-time",
+          "title": "Date Start",
+          "type": "string"
+        },
+        "date_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date End"
+        },
+        "duration_min": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 10080,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Min"
+        },
+        "city": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "City",
+          "type": "string"
+        },
+        "venue": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Venue",
+          "type": "string"
+        },
+        "address": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Address",
+          "type": "string"
+        },
+        "lat": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lat"
+        },
+        "lon": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lon"
+        },
+        "description": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "price_min": {
+          "minimum": 0,
+          "title": "Price Min",
+          "type": "number"
+        },
+        "price_max": {
+          "minimum": 0,
+          "title": "Price Max",
+          "type": "number"
+        },
+        "is_free": {
+          "title": "Is Free",
+          "type": "boolean"
+        },
+        "age_limit": {
+          "default": 0,
+          "enum": [
+            0,
+            6,
+            12,
+            16,
+            18
+          ],
+          "title": "Age Limit",
+          "type": "integer"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "org_link": {
+          "anyOf": [
+            {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Org Link"
+        },
+        "source_url": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "source_type": {
+          "default": "ручной ввод",
+          "enum": [
+            "ручной ввод",
+            "импорт",
+            "RSS",
+            "API",
+            "страница"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Hash"
+        },
+        "verified_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verified At"
+        },
+        "confidence": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "status": {
+          "default": "опубликовано",
+          "enum": [
+            "опубликовано",
+            "черновик",
+            "отменено"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "dedup_key": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dedup Key"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated At"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "category",
+        "date_start",
+        "city",
+        "venue",
+        "address",
+        "description",
+        "price_min",
+        "price_max",
+        "is_free",
+        "source_url"
+      ],
+      "title": "EventCard",
+      "type": "object"
+    },
+    "ToolCallTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "default": "unknown",
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        },
+        "result_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Result Ids",
+          "type": "array"
+        },
+        "duration_ms": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "number"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "maxLength": 12000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "title": "ToolCallTrace",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "reply_text": {
+      "maxLength": 12000,
+      "minLength": 1,
+      "title": "Reply Text",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/EventCard"
+      },
+      "maxItems": 5,
+      "title": "Events",
+      "type": "array"
+    },
+    "clarifying_question": {
+      "anyOf": [
+        {
+          "maxLength": 12000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Clarifying Question"
+    },
+    "requires_confirmation": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requires Confirmation"
+    },
+    "is_fallback": {
+      "default": false,
+      "title": "Is Fallback",
+      "type": "boolean"
+    },
+    "trace": {
+      "$ref": "#/$defs/AgentTrace"
+    }
+  },
+  "required": [
+    "reply_text"
+  ],
+  "title": "AgentResponse",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,135 @@
+{
+  "$defs": {
+    "ToolCallTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "default": "unknown",
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        },
+        "result_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Result Ids",
+          "type": "array"
+        },
+        "duration_ms": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "number"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "maxLength": 12000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "title": "ToolCallTrace",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "request": {
+      "additionalProperties": true,
+      "title": "Request",
+      "type": "object"
+    },
+    "plan": {
+      "items": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Plan",
+      "type": "array"
+    },
+    "tool_calls": {
+      "items": {
+        "$ref": "#/$defs/ToolCallTrace"
+      },
+      "title": "Tool Calls",
+      "type": "array"
+    },
+    "event_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Event Ids",
+      "type": "array"
+    },
+    "latency_ms": {
+      "default": 0.0,
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "number"
+    },
+    "tokens_input": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Tokens Input",
+      "type": "integer"
+    },
+    "tokens_output": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Tokens Output",
+      "type": "integer"
+    },
+    "total_tokens": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Total Tokens",
+      "type": "integer"
+    },
+    "cost_usd": {
+      "default": 0.0,
+      "minimum": 0,
+      "title": "Cost Usd",
+      "type": "number"
+    },
+    "cost_estimated": {
+      "default": true,
+      "title": "Cost Estimated",
+      "type": "boolean"
+    },
+    "fallback_reason": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fallback Reason"
+    }
+  },
+  "title": "AgentTrace",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

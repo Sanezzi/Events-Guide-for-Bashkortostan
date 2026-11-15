@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "user",
+            "assistant"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "Message",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Callers send at least the last five turns when available; cold starts are valid.",
+  "properties": {
+    "session_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Session Id",
+      "type": "string"
+    },
+    "user_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    },
+    "message": {
+      "maxLength": 12000,
+      "minLength": 1,
+      "title": "Message",
+      "type": "string"
+    },
+    "history": {
+      "description": "Last at least five messages when available; fewer allowed for a new dialogue.",
+      "items": {
+        "$ref": "#/$defs/Message"
+      },
+      "maxItems": 40,
+      "title": "History",
+      "type": "array"
+    },
+    "confirm_action": {
+      "default": false,
+      "title": "Confirm Action",
+      "type": "boolean"
+    },
+    "confirmation_version": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confirmation Version"
+    }
+  },
+  "required": [
+    "session_id",
+    "user_id",
+    "message"
+  ],
+  "title": "AgentRequest",
+  "type": "object"
+}
