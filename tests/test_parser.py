@@ -31,3 +31,13 @@ def test_parser_extracts_event_metadata_and_resolves_links():
     item["eventStatus"] = "https://schema.org/EventCancelled"
     cancelled = f'<script type="application/ld+json">{json.dumps(item)}</script>'
     assert parse_event_page(cancelled, "https://theatre.example/afisha", now=now) == []
+
+
+def test_listing_discovers_local_event_pages_only():
+    raw = """<a href="/afisha/skazka">Сказка</a>
+             <a href="https://[bad/afisha/broken">Сломанная ссылка</a>
+             <a href="https://elsewhere.example/afisha/show">Другой сайт</a>
+             <a href="/about">О театре</a>"""
+    assert event_page_links(raw, "https://theatre.example/afisha") == [
+        "https://theatre.example/afisha/skazka"
+    ]
