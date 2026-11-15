@@ -168,3 +168,34 @@ class EventOut(BaseModel):
     is_demo: bool
     created_at: datetime
     updated_at: datetime
+
+
+class SearchFilters(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    q: str | None = Field(default=None, max_length=2000)
+    city: str | None = Field(default=None, max_length=150)
+    category: Category | None = None
+    period: Literal["today", "tomorrow", "weekend", "week"] | None = None
+    date: Date | None = None
+    max_price: Decimal | None = Field(default=None, ge=0)
+    is_free: bool | None = None
+    language: Literal["ru", "ba", "en", "ru/ba"] | None = None
+    age: int | None = Field(default=None, ge=0, le=120)
+    venue: str | None = Field(default=None, max_length=300)
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    duration_max: int | None = Field(default=None, gt=0, le=10080)
+    full_price: bool = False
+    include_demo: bool = True
+    sort: Literal["date_start", "price_min", "price_max", "price_max_desc", "title"] = "date_start"
+    offset: int | None = Field(default=None, ge=0)
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=5, ge=1, le=100)
+
+
+class SearchResult(BaseModel):
+    items: list[EventOut]
+    total: int
+    page: int
+    page_size: int
+    explanation: str | None = None
