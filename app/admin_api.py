@@ -49,3 +49,14 @@ async def overview(request: Request):
 @router.get("/events", response_model=list[EventCard])
 async def admin_events(request: Request, status: Literal["опубликовано", "черновик", "отменено"] | None = None):
     return await request.app.state.catalog.events(status=status)
+
+
+@router.post("/import")
+async def import_events(request: Request, file: UploadFile = File(...)):
+    try:
+        content = await file.read(ImporterService.MAX_BYTES + 1)
+    finally:
+        await file.close()
+    if len(content) > ImporterService.MAX_BYTES:
+        raise HTTPException(413, "Файл превышает 10 МиБ")
+    return await request.app.state.catalog.import_file(content, file.filename or "", "web-admin")
