@@ -175,3 +175,40 @@ class CultureAgentService:
             raise
         finally:
             trace.duration_ms = (time.monotonic() - started) * 1000
+
+    def _finish(self, run: _Run, state: _Session, events: list[EventCard] | None = None,
+                text: str | None = None, question: str | None = None,
+                pending: dict | None = None) -> AgentResponse:
+        events = events or []
+        state.previous = events
+        state.touched = time.monotonic()
+        run.trace.event_ids = list(run.records)
+        run.trace.latency_ms = (time.monotonic() - run.started) * 1000
+        if text is None:
+            lines = []
+            for event in events:
+                price = "бесплатно" if event.is_free else f"{event.price_min:g}–{event.price_max:g} ₽ за билет"
+                local = event.date_start.astimezone(self._timezone)
+                c = state.constraints
+                why = [f"в выбранном городе {event.city}" if c.city else f"город {event.city}"]
+                if c.age is not None:
+                    why.append(f"рейтинг {event.age_limit}+ допускает ребёнка {c.age} лет")
+                if c.budget is not None:
+                    why.append(f"верхняя цена на {c.party} чел. — {event.price_max * c.party:g} ₽, в пределах {c.budget:g} ₽")
+                if c.end_hour is not None and event.date_end is not None:
+                    why.append(f"окончание {event.date_end.astimezone(self._timezone):%H:%M} до указанного предела")
+                if c.start_after is not None:
+                    why.append(f"начало от {c.start_after:%H:%M}")
+                if c.is_free:
+                    why.append("вход бесплатный")
+                lines.append(f"{event.title}: {local:%d.%m.%Y %H:%M}, {event.venue}; {price}, {event.age_limit}+. Подходит: " + "; ".join(why) + ".")
+            text = "\n".join(lines) or "По заданным условиям подтверждённых вариантов нет. Можно изменить дату или бюджет."
+            if events and state.constraints.route:
+                text += (f"\nОбщий верхний бюджет на {state.constraints.party} чел.: {sum(e.price_max for e in events) * state.constraints.party:g} ₽. "
+                         f"Между событиями заложен условный запас {self.settings.transfer_buffer_min} мин.; "
+                         "время дороги без карт неизвестно.")
+        if run.trace.fallback_reason and run.trace.fallback_reason != "rate_limit":
+            text = "Работаю в резервном режиме поиска. " + text
+        return AgentResponse(reply_text=text[:12000], events=events,
+            clarifying_question=question, requires_confirmation=pending,
+            is_fallback=run.trace.fallback_reason is not None, trace=run.trace)
