@@ -290,3 +290,42 @@ async def feedback(body: FeedbackInput, request: Request, response: Response):
     if not identifier:
         raise HTTPException(404, "Событие не найдено")
     return ActionResult(id=identifier, success=True, message="Обращение сохранено для модератора.")
+
+
+class OrganizerEvent(BaseModel):
+    title: str = Field(min_length=1, max_length=300)
+    category: Category
+    date_start: datetime
+    city: str = Field(min_length=1, max_length=150)
+    venue: str = Field(min_length=1, max_length=300)
+    address: str = Field(min_length=1, max_length=500)
+    description: str = Field(min_length=1, max_length=4000)
+    price_min: float = Field(ge=0, le=1000000)
+    age_limit: Literal[0, 6, 12, 16, 18]
+    source_url: str = Field(max_length=2048)
+
+    @model_validator(mode="after")
+    def check_proposal(self):
+        if self.date_start.tzinfo is None or self.date_start <= datetime.now(timezone.utc):
+            raise ValueError("Укажите предстоящую дату и часовой пояс")
+        EventInput.model_validate({**self.model_dump(), "status": "черновик"})
+        return self
+
+
+class EventSubmission(BaseModel):
+    event: OrganizerEvent
+    website: str = Field(default="", max_length=250)
+
+
+@app.post("/api/v1/event-submissions", response_model=ActionResult, status_code=201, tags=["events"])
+async def submit_event(body: EventSubmission):
+    if body.website:
+        raise HTTPException(422, "Не удалось проверить форму")
+    identifier = uuid4()
+    data = {**body.event.model_dump(mode="json"), "id": str(identifier), "status": "черновик", "source_type": "manual"}
+    report = await app.state.catalog.import_file(
+        json.dumps([data], ensure_ascii=False).encode(), "proposal.json", "organizer-form", merge_existing=False
+    )
+    if report.added != 1:
+        raise HTTPException(409, "Событие уже есть в каталоге или на проверке")
+    return ActionResult(id=identifier, success=True, message="Событие отправлено на модерацию.")
