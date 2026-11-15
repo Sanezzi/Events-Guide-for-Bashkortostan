@@ -148,3 +148,22 @@ async def test_timezone_date_boundary(database):
         repo = SqlCatalogRepository(session)
         assert (await repo.search(SearchFilters(date="2099-11-16"))).total == 1
         assert (await repo.search(SearchFilters(date="2099-11-15"))).total == 0
+
+
+@pytest.mark.asyncio
+async def test_subscription_dedup_ownership_and_language_persistence(database):
+    async with database.sessions() as session:
+        repo = SqlCatalogRepository(session)
+        first = await repo.subscribe("1", "Уфа", "концерт")
+        assert (await repo.subscribe("1", "УФА", "концерт")).id == first.id
+        assert await repo.unsubscribe("2", first.id) == 0
+        await repo.set_lang("1", "ba")
+        assert await repo.get_lang("2") == "ru"
+        with pytest.raises(ValueError):
+            await repo.set_lang("1", "xx")
+    async with database.sessions() as session:
+        repo = SqlCatalogRepository(session)
+        assert await repo.get_lang("1") == "ba"
+        assert len(await repo.list_subscriptions("1")) == 1
+        assert await repo.unsubscribe("1") == 1
+        assert await repo.list_subscriptions("1") == []
