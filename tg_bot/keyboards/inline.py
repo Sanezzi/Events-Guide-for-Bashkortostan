@@ -159,3 +159,28 @@ def event_keyboard(lang: str, event: object, *, screen: str, back: str) -> Inlin
     rows.append([button("bot.subscribe", lang, f"subscribe:{screen}:{event.id}")])
     rows.append(back_row(lang, back))
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def subscriptions_keyboard(
+    lang: str, subscriptions: list, page: int = 1, total: int | None = None, page_size: int = 10
+) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=f"{t('bot.unsubscribe', lang)} #{sub.id}",
+                callback_data=f"unsubscribe:{sub.id}",
+            )
+        ]
+        for sub in subscriptions
+    ]
+    navigation = []
+    if page > 1:
+        navigation.append(InlineKeyboardButton(text=f"‹ {page - 1}", callback_data=f"subpage:{page - 1}"))
+    if total is not None and page * page_size < total:
+        navigation.append(InlineKeyboardButton(text=f"{page + 1} ›", callback_data=f"subpage:{page + 1}"))
+    if navigation:
+        rows.append(navigation)
+    if subscriptions:
+        rows.append([button("bot.remove_all", lang, "unsubscribe:all")])
+    rows.append(back_row(lang))
+    return InlineKeyboardMarkup(inline_keyboard=rows)
