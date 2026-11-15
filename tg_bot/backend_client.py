@@ -36,3 +36,16 @@ class BackendClient:
 
     async def set_lang(self, user_id, lang):
         await self.request("PUT", "language", json={"user_id": user_id, "lang": lang})
+
+    async def subscribe(self, user_id, city=None, category=None):
+        row = await self.request("POST", "subscriptions", json={
+            "user_id": user_id, "city": city, "category": category})
+        return SimpleNamespace(**row)
+
+    async def list_subscriptions(self, user_id):
+        rows = await self.request("POST", "subscriptions/list", json={"user_id": user_id})
+        return [SimpleNamespace(**row) for row in rows]
+
+    async def unsubscribe(self, user_id, subscription_id=None):
+        return await self.request("POST", "subscriptions/delete", json={
+            "user_id": user_id, "subscription_id": subscription_id})
