@@ -295,3 +295,39 @@ ADVERSARIAL = ("provider_error_recovery", "provider_429_recovery", "provider_tim
 
 def deny_network(*args, **kwargs):
     raise AssertionError("Real network is forbidden in this evaluation")
+
+
+async def evaluate(include_adversarial: bool = False) -> dict:
+    report: dict[str, Any] = {"clock": NOW.isoformat(), "network": "disabled",
+        "prompt_version": PROMPT_VERSION, "model": "offline-script",
+        "actual_provider_cost_usd": 0.0,
+        "fixture": "synthetic MockEventRepository; not a real cultural listing",
+        "controls": [], "adversarial": []}
+    module = importlib.import_module("ai_agent.agent")
+    with ExitStack() as stack:
+        stack.enter_context(patch.object(module, "datetime", FrozenDatetime))
+        stack.enter_context(patch.object(socket.socket, "connect", deny_network))
+        stack.enter_context(patch.object(socket.socket, "connect_ex", deny_network))
+        stack.enter_context(patch.object(socket, "create_connection", deny_network))
+        for group, names in (("controls", CONTROLS), ("adversarial", ADVERSARIAL if include_adversarial else ())):
+            for name in names:
+                scenario = Scenario(name)
+                row: dict[str, Any] = {"name": name, "passed": False}
+                try:
+                    await exercise(scenario)
+                    row["passed"] = True
+                except Exception as exc:
+                    row["error"] = f"{type(exc).__name__}: {exc}"
+                finally:
+                    await scenario.close()
+                row["turns"] = len(scenario.responses)
+                row["sdk_requests"] = len(scenario.provider.requests) if scenario.provider else 0
+                row["tool_calls"] = sum(len(r.trace.tool_calls) for r in scenario.responses)
+                row["tokens"] = sum(r.trace.total_tokens for r in scenario.responses)
+                row["estimated_cost_usd"] = sum(r.trace.cost_usd for r in scenario.responses)
+                row["fallback_reasons"] = [r.trace.fallback_reason for r in scenario.responses if r.is_fallback]
+                report[group].append(row)
+    rows = report["controls"] + report["adversarial"]
+    report["summary"] = {"control_count": len(report["controls"]), "passed": sum(r["passed"] for r in rows),
+        "failed": sum(not r["passed"] for r in rows), "total": len(rows)}
+    return report
