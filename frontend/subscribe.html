@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подписка — Афиша культуры Башкортостана</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="page-subscribe">
+<header class="topbar"><div class="wrap topbar-in"><a class="logo" href="/">Афиша <span>Башкортостана</span></a><nav><a href="/">Каталог</a><a href="/chat">Чат-агент</a><a href="/subscribe" aria-current="page">Подписка</a><a href="/about">О сервисе</a><a href="/admin">Модерация</a><a href="/docs">API · Swagger</a></nav></div></header>
+<main class="wrap">
+<section class="hero"><h1>Подписка на новые события</h1><p>Выберите город и, при желании, категорию. Подписка хранит только идентификатор и фильтры — без телефона и адреса. Оформить подписку можно и в чате: агент покажет точное действие и попросит подтверждение.</p><p class="meta landmark-caption" lang="ba">Яҡтыкүл — Башҡортостандың иң матур күлдәренең береһе.</p></section>
+<form class="filters" id="sub-form" style="grid-template-columns:1fr 1fr 1fr">
+<label>Город<select id="city" required><option value="">— выберите город —</option></select></label>
+<label>Категория<select id="category"><option value="">Все категории</option><option>концерт</option><option>спектакль</option><option>выставка</option><option>фестиваль</option><option>кино</option><option>экскурсия</option><option>другое</option></select></label>
+<label>Периодичность<select id="period"><option value="weekly">Раз в неделю</option><option value="daily">Ежедневно</option><option value="monthly">Раз в месяц</option></select></label>
+<div class="actions"><button class="btn" type="submit">Подписаться</button><a class="btn ghost" href="/chat">Оформить через агента</a></div>
+</form>
+<p id="result" class="meta" aria-live="polite"></p>
+<section><h2>Мои подписки</h2><p>Подписки сайта доступны в этом браузере. Для уведомлений оформите подписку в Telegram-боте.</p><ul id="subscriptions"></ul></section>
+</main>
+<footer><div class="wrap"><p><strong>Афиша культуры Башкортостана</strong> — демонстрационный сервис, не официальный сайт Министерства культуры.</p></div></footer>
+<script src="/static/subscribe.js"></script>
+</body>
+</html>
