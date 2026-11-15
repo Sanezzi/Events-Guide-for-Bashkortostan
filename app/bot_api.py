@@ -137,3 +137,17 @@ async def notifications(request: Request):
             if len(output) == 50:
                 break
     return output
+
+
+@router.post("/notifications/delivered")
+async def delivered(request: Request, body: Delivered):
+    if body.through.utcoffset() is None or body.through > datetime.now(timezone.utc):
+        raise HTTPException(422, "Некорректное время рассылки")
+    async with request.app.state.database.sessions() as session:
+        sub = await session.get(Subscription, body.subscription_id, with_for_update=True)
+        if not sub or sub.user_id != bot_identity(body.user_id):
+            raise HTTPException(404, "Подписка не найдена")
+        if sub.delivered_at is None or body.through > sub.delivered_at:
+            sub.delivered_at = body.through
+            await session.commit()
+    return {"ok": True}
