@@ -178,3 +178,13 @@ def robots():
     if origin:
         rules += ['', f'Sitemap: {origin}/sitemap.xml']
     return '\n'.join(rules) + '\n'
+
+
+@router.get('/llms.txt', response_class=PlainTextResponse)
+def llms(request: Request):
+    base = root_url(request)
+    return (
+        f'# {SITE_TITLE}\n\n> {DESCRIPTION}\n\n'
+        f'- [Каталог]({base}/)\n- [Карта сайта]({base}/sitemap.xml)\n'
+        f'- [Лента событий]({base}/rss.xml)\n- [Документация API]({base}/docs)\n'
+    )
