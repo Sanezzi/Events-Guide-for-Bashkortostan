@@ -212,3 +212,16 @@ class CultureAgentService:
         return AgentResponse(reply_text=text[:12000], events=events,
             clarifying_question=question, requires_confirmation=pending,
             is_fallback=run.trace.fallback_reason is not None, trace=run.trace)
+
+    def _select(self, run: _Run, state: _Session, cards: list[EventCard]) -> list[EventCard]:
+        eligible = [e for e in cards if dialogue.eligible(e, state.constraints, run.now)]
+        age = state.constraints.age
+        eligible.sort(key=lambda event: (
+            event.price_max if state.constraints.cheaper else 0,
+            "семейное" not in event.tags if age is not None else False,
+            event.age_limit != age if age is not None else False,
+            event.date_start, event.price_max,
+        ))
+        if state.constraints.route:
+            return dialogue.make_route(eligible, state.constraints, self.settings.transfer_buffer_min)
+        return eligible[:5]
