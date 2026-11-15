@@ -144,3 +144,12 @@ class AgentCatalog:
             venue=query.venue, date_from=query.date_from, date_to=query.date_to,
         ), page_size=100)
         return agent.SearchResult(events=[agent_card(row) for row in rows])
+
+    async def subscribe(self, query: agent.SubscribeArgs) -> agent.ActionResult:
+        row = await self.catalog.subscribe(query.user_id, query.city, query.category, query.period)
+        return agent.ActionResult(id=subscription_uuid(row), success=True, message="Подписка сохранена.")
+
+    async def save_feedback(self, query: agent.FeedbackArgs) -> agent.ActionResult:
+        identifier = await self.catalog.feedback(query.user_id, query.event_id, query.text)
+        return agent.ActionResult(id=identifier or query.event_id, success=bool(identifier),
+                                  message="Обращение сохранено." if identifier else "Событие не найдено.")
