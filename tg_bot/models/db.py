@@ -176,3 +176,32 @@ class AuditLog(Base):
     event_id: Mapped[UUID | None] = mapped_column(Uuid)
     details: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class Database:
+    def __init__(self, url: str):
+        if url.startswith("sqlite://"):
+            url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+        elif url.startswith(("postgres://", "postgresql://")):
+            url = "postgresql+asyncpg://" + url.split("://", 1)[1]
+        self.engine = create_async_engine(url, pool_pre_ping=True)
+        if self.engine.dialect.name == "sqlite":
+
+            @event.listens_for(self.engine.sync_engine, "connect")
+            def configure_sqlite(connection, _):
+                from tg_bot.models.schemas import normalize
+
+                connection.create_function("catalog_normalize", 1, normalize, deterministic=True)
+                cursor = connection.cursor()
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.execute("PRAGMA busy_timeout=5000")
+                cursor.close()
+
+        self.sessions = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
+
+    async def create_tables(self) -> None:
+        async with self.engine.begin() as connection:
+            await connection.run_sync(Base.metadata.create_all)
+
+    async def close(self) -> None:
+        await self.engine.dispose()
