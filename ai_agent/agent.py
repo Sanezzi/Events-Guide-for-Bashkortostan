@@ -379,3 +379,27 @@ class CultureAgentService:
                 args = TOOL_MODELS[name].model_validate_json(json.dumps(merged))
             tools.append((name, args))
         return tools
+
+    async def _propose_model_action(self, run, state, name, args):
+        text = run.request.message.lower().replace("ё", "е")
+        keywords = ("подпис", "подпиш", "уведомл") if name == "subscribe" else (
+            "отзыв", "обращен", "организатор", "сообщен"
+        )
+        if not any(word in text for word in keywords):
+            raise ValueError("mutation_without_user_intent")
+        updates = {"user_id": run.request.user_id}
+        if name == "subscribe":
+            if state.constraints.city:
+                updates["city"] = state.constraints.city
+            if state.constraints.category:
+                updates["category"] = state.constraints.category
+        else:
+            requested_id = dialogue.UUID_RE.search(run.request.message)
+            if requested_id is not None and str(args.event_id) != requested_id[0].lower():
+                raise ValueError("feedback_event_mismatch")
+            if args.event_id not in run.records:
+                await self._execute(run, "get_event", GetEventArgs(event_id=args.event_id))
+            if args.event_id not in run.records:
+                raise ValueError("feedback_event_not_found")
+        args = TOOL_MODELS[name].model_validate_json(json.dumps({**args.model_dump(mode="json"), **updates}))
+        return self._propose(run, state, name, args)
