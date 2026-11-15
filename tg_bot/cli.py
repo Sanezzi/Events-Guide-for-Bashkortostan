@@ -1,5 +1,3 @@
-"""Catalog administration: python -m tg_bot.cli import PATH / seed / init-db."""
-
 from __future__ import annotations
 
 import argparse

@@ -1,5 +1,3 @@
-"""Portable SQLAlchemy 2 asynchronous persistence."""
-
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -52,7 +50,7 @@ class UTCDateTime(TypeDecorator):
 
 
 class Base(DeclarativeBase):
-    """Shared metadata for bot and website migrations."""
+    pass
 
 
 class Event(Base):
@@ -172,7 +170,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
     id: Mapped[int] = mapped_column(primary_key=True)
     action: Mapped[str] = mapped_column(String(40))
-    actor: Mapped[str] = mapped_column(String(64))  # irreversible actor digest; never raw identity
+    actor: Mapped[str] = mapped_column(String(64))
     event_id: Mapped[UUID | None] = mapped_column(Uuid)
     details: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)

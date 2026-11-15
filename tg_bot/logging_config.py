@@ -1,5 +1,3 @@
-"""Allowlisted JSON logs: never serialize request bodies, URLs, tokens or user IDs."""
-
 import json
 import logging
 from contextvars import ContextVar
@@ -28,7 +26,6 @@ def configure_logging() -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
     logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
-    # Access URLs may contain personal queries; use request middleware instead.
     logging.getLogger("uvicorn.access").disabled = True
 
 

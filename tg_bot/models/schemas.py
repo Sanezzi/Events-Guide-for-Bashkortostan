@@ -1,5 +1,3 @@
-"""Validated public catalog contracts. All timestamps require an explicit offset."""
-
 from __future__ import annotations
 
 import hashlib
@@ -127,7 +125,6 @@ class EventInput(BaseModel):
             ]
         )
         self.sources = list(dict.fromkeys([self.source_url, *self.sources]))
-        # Hash normalized content, not caller-controlled keys, for reliable idempotency.
         content = self.model_dump(mode="json", exclude={"id", "source_hash", "dedup_key"})
         self.source_hash = digest(content)
         if self.is_demo and "demo" not in self.title.casefold():

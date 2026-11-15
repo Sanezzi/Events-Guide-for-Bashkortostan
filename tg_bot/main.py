@@ -1,5 +1,3 @@
-"""Standalone Telegram polling bot: python -m tg_bot.main."""
-
 import asyncio
 import logging
 from contextlib import suppress

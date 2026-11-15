@@ -1,5 +1,3 @@
-"""Authorized document imports with bounded in-memory downloads."""
-
 from __future__ import annotations
 
 import re
@@ -119,7 +117,6 @@ def create_router() -> Router:
             back_keyboard(lang),
         )
         if report.errors:
-            # Row validation details are useful to the authorized admin, never logged.
             details = "\n".join(
                 t(
                     "bot.import_row_error",

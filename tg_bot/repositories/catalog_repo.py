@@ -1,5 +1,3 @@
-"""Catalog operations shared by the bot, agent and web application."""
-
 from __future__ import annotations
 
 from datetime import datetime, time, timedelta

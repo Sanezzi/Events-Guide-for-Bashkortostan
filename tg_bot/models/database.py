@@ -1,5 +1,3 @@
-"""Compatibility import; shared SQLAlchemy metadata lives in db.py."""
-
 from .db import (
     AuditLog,
     Base,

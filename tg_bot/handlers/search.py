@@ -1,5 +1,3 @@
-"""Catalog search, persistent filters, event cards and optional agent dialogue."""
-
 from __future__ import annotations
 
 import asyncio
@@ -84,7 +82,6 @@ async def search_results(
     filters = SearchFilters(**values)
     async with repository(database) as repo:
         result = await BotService(repo, agent).search(filters)
-    # A stale page can become empty after catalog updates.
     if not result.items and result.total and filters.page > 1:
         values = {
             **values,
@@ -192,7 +189,6 @@ async def agent_search(
                 timeout=30,
             )
     except Exception:
-        # A model failure must never disable deterministic catalog search.
         return False
     if reply is None:
         return False

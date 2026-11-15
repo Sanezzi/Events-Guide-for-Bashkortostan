@@ -1,5 +1,3 @@
-"""Environment configuration; importing this module has no network side effects."""
-
 from functools import lru_cache
 from pathlib import Path
 from zoneinfo import ZoneInfo

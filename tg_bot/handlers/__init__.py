@@ -1,5 +1,3 @@
-"""Build a fresh aiogram router with application dependencies supplied by DI."""
-
 from __future__ import annotations
 
 import logging
@@ -26,7 +24,6 @@ def create_router() -> Router:
 
     @router.errors()
     async def handle_error(event: ErrorEvent, database=None):
-        # Never include exception messages, update contents, identities or tokens.
         logger.error(
             "bot_handler_error",
             extra={"event": "bot_handler_error", "error_type": type(event.exception).__name__},

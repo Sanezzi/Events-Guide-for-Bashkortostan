@@ -1,5 +1,3 @@
-"""Localized Telegram inline keyboards; callback payloads contain IDs only."""
-
 from __future__ import annotations
 
 from typing import get_args

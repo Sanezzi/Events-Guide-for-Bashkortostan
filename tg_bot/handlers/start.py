@@ -1,5 +1,3 @@
-"""Entry commands and shared safe Telegram response helpers."""
-
 from __future__ import annotations
 
 import asyncio
@@ -39,7 +37,6 @@ async def answer_callback(query: CallbackQuery, text: str | None = None) -> None
     try:
         await query.answer(text=text)
     except (TelegramBadRequest, TelegramForbiddenError, TelegramNetworkError):
-        # Expired callbacks are normal; never log update bodies or user identifiers.
         return
 
 
@@ -69,11 +66,9 @@ async def respond(
 
 
 async def send_long(target: Message | CallbackQuery, text: str, reply_markup=None) -> None:
-    # Split raw text BEFORE escaping so HTML entities/tags cannot be truncated.
     chunks = []
     remaining = text
     while remaining:
-        # Respect both escaped payload size and Telegram UTF-16 text limits.
         low, high = 1, min(len(remaining), 3900)
         while low < high:
             middle = (low + high + 1) // 2

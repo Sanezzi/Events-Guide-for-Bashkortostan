@@ -1,5 +1,3 @@
-"""Application boundary with optional, failure-tolerant agent integration."""
-
 from __future__ import annotations
 
 import asyncio
@@ -44,13 +42,10 @@ class BotService:
                 if reply is None:
                     return None
                 reply = AgentReply.model_validate(reply)
-                # A broken agent must never link missing, cancelled or draft events.
                 for event_id in reply.event_ids:
                     event = await self.repo.get_event(event_id)
                     if event is None or event.status != "опубликовано":
                         return None
                 return reply
         except Exception:
-            # Keep deterministic catalog access available on bridge/network errors.
-            # Cancellation propagates (CancelledError inherits BaseException).
             return None

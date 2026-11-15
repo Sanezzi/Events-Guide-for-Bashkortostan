@@ -1,5 +1,3 @@
-"""Idempotent CSV/JSON import with independent row transactions and savepoints."""
-
 from __future__ import annotations
 
 import csv
@@ -42,8 +40,6 @@ class ImporterService:
                 if not isinstance(rows, list):
                     raise ValueError("JSON must be an array or an object containing events")
             elif extension == ".csv":
-                # Infer delimiter from the header: quoted multiline descriptions
-                # and uneven content otherwise confuse Sniffer on valid CSV.
                 dialect = csv.Sniffer().sniff(
                     text.splitlines()[0] if text.splitlines() else "", delimiters=",;\t"
                 )
@@ -80,8 +76,6 @@ class ImporterService:
                         except ValueError:
                             pass
             source_hash = digest(row)
-            # Restrict retained source payload to documented event fields. Unknown
-            # user/account fields never enter raw storage, errors or audit records.
             payload = (
                 {key: value for key, value in row.items() if key in EventInput.model_fields}
                 if isinstance(row, dict)
@@ -147,7 +141,6 @@ class ImporterService:
                         await self.session.flush()
                         event_id = existing.id
             except ValidationError as exc:
-                # Exclude input and context: both may contain sensitive source data.
                 error = "; ".join(
                     ".".join(map(str, entry["loc"])) + ": " + entry["type"]
                     for entry in exc.errors(
