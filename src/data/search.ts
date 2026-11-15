@@ -52,3 +52,13 @@ export function parseQuery(raw: string, cities: string[] = primaryCities, previo
   if (rest) result.text = rest
   return result
 }
+
+export function criteria(filters: Filters): string[] {
+  return [
+    filters.city, filters.category && capital(filters.category), filters.period && periods[filters.period],
+    filters.date_from && filters.date_from.slice(0, 10) === filters.date_to?.slice(0, 10) && new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium', timeZone: zone }).format(new Date(filters.date_from)),
+    filters.is_free ? 'Бесплатно' : filters.price_max !== undefined && 'До ' + money(filters.price_max),
+    filters.age_limit !== undefined && `Подходит для ${filters.age_limit} лет`,
+    filters.language === 'ba' && 'Башҡорт телендә',
+  ].filter((value): value is string => Boolean(value))
+}
