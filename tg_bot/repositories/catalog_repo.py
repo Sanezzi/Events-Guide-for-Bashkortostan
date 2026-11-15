@@ -193,3 +193,13 @@ class SqlCatalogRepository:
             ).all()
         )
         return {"total": total, "free": free, "cities": cities}
+
+    async def get_lang(self, user_id: str) -> str:
+        row = await self.session.get(UserSettings, str(user_id))
+        return row.lang if row else "ru"
+
+    async def set_lang(self, user_id: str, lang: str) -> None:
+        if lang not in {"ru", "ba", "en"}:
+            raise ValueError("unsupported language")
+        await self.session.merge(UserSettings(user_id=str(user_id), lang=lang))
+        await self.session.commit()
