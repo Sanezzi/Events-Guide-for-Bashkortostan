@@ -156,3 +156,18 @@ async def observe(request, call_next):
     LOG.info("%s", json.dumps({"request_id": identifier, "route": getattr(route, "path", None),
                               "method": request.method, "status": response.status_code, "duration_ms": round(duration, 2)}))
     return response
+
+
+@app.get("/health", tags=["service"])
+async def health():
+    try:
+        result = await app.state.catalog.search(SearchFilters(page_size=1))
+    except Exception as exc:
+        LOG.warning("health_failed error_type=%s", type(exc).__name__)
+        raise HTTPException(503, "База каталога временно недоступна") from exc
+    return {"status": "ok", "version": app.version, "events_published": result.total}
+
+
+@app.get("/metrics", tags=["service"])
+def metrics():
+    return app.state.metrics
