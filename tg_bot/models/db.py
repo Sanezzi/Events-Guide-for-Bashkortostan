@@ -154,3 +154,25 @@ class AppSetting(Base):
     __tablename__ = "app_settings"
     key: Mapped[str] = mapped_column(String(80), primary_key=True)
     value: Mapped[str] = mapped_column(String(128))
+
+
+class RawImport(Base):
+    __tablename__ = "raw_imports"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    batch_id: Mapped[UUID] = mapped_column(Uuid, index=True)
+    row_number: Mapped[int] = mapped_column(Integer)
+    source_hash: Mapped[str] = mapped_column(String(64), index=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(20))
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    action: Mapped[str] = mapped_column(String(40))
+    actor: Mapped[str] = mapped_column(String(64))  # irreversible actor digest; never raw identity
+    event_id: Mapped[UUID | None] = mapped_column(Uuid)
+    details: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
