@@ -127,3 +127,10 @@ async def admin_subscriptions(request: Request):
     async with request.app.state.database.sessions() as session:
         rows = await session.scalars(select(Subscription).order_by(Subscription.id.desc()).limit(100))
         return [{"id": row.id, "city": row.city, "category": row.category, "period": row.period} for row in rows]
+
+
+@router.get("/feedback")
+async def admin_feedback(request: Request):
+    async with request.app.state.database.sessions() as session:
+        rows = await session.scalars(select(Feedback).order_by(Feedback.created_at.desc()).limit(100))
+        return [{"id": row.id, "event_id": row.event_id, "text": row.text} for row in rows]
