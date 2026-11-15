@@ -53,3 +53,59 @@ class UTCDateTime(TypeDecorator):
 
 class Base(DeclarativeBase):
     """Shared metadata for bot and website migrations."""
+
+
+class Event(Base):
+    __tablename__ = "events"
+    __table_args__ = (
+        CheckConstraint("price_min >= 0 AND price_max >= price_min", name="valid_prices"),
+        CheckConstraint("age_limit IN (0,6,12,16,18)", name="valid_age"),
+        CheckConstraint(
+            "category IN ('концерт','спектакль','выставка','фестиваль','кино','экскурсия','другое')",
+            name="valid_category",
+        ),
+        CheckConstraint(
+            "source_type IN ('manual','import','rss','api','page','demo')", name="valid_source_type"
+        ),
+        CheckConstraint("lat IS NULL OR (lat >= -90 AND lat <= 90)", name="valid_latitude"),
+        CheckConstraint("lon IS NULL OR (lon >= -180 AND lon <= 180)", name="valid_longitude"),
+        CheckConstraint("duration_min IS NULL OR duration_min > 0", name="valid_duration"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="valid_confidence"),
+        CheckConstraint(
+            "language IS NULL OR language IN ('ru','ba','en','ru/ba')", name="valid_event_language"
+        ),
+        CheckConstraint("status IN ('опубликовано','черновик','отменено')", name="valid_status"),
+        CheckConstraint("date_end IS NULL OR date_end >= date_start", name="valid_dates"),
+        CheckConstraint("NOT is_free OR (price_min = 0 AND price_max = 0)", name="valid_free"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    title: Mapped[str] = mapped_column(String(300))
+    normalized_title: Mapped[str] = mapped_column(String(300), index=True)
+    category: Mapped[str] = mapped_column(String(30), index=True)
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list)
+    date_start: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
+    date_end: Mapped[datetime | None] = mapped_column(UTCDateTime())
+    duration_min: Mapped[int | None] = mapped_column(Integer)
+    city: Mapped[str] = mapped_column(String(150), index=True)
+    venue: Mapped[str] = mapped_column(String(300))
+    address: Mapped[str] = mapped_column(String(500))
+    lat: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
+    lon: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
+    description: Mapped[str] = mapped_column(Text)
+    price_min: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
+    price_max: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
+    is_free: Mapped[bool] = mapped_column(Boolean, default=False)
+    age_limit: Mapped[int] = mapped_column(Integer, default=0)
+    language: Mapped[str | None] = mapped_column(String(30))
+    org_link: Mapped[str | None] = mapped_column(Text)
+    source_url: Mapped[str] = mapped_column(Text)
+    source_type: Mapped[str] = mapped_column(String(30), default="import")
+    source_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    sources: Mapped[list[str]] = mapped_column(JSON, default=list)
+    verified_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
+    confidence: Mapped[Decimal] = mapped_column(Numeric(4, 3), default=1)
+    status: Mapped[str] = mapped_column(String(20), default="черновик", index=True)
+    dedup_key: Mapped[str] = mapped_column(String(64), unique=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
