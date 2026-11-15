@@ -326,3 +326,48 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(filters={**data.get("filters", {}), "category": value, "page": 1})
         await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.message(SearchFlow.value, F.text, ~F.text.startswith("/"))
+    async def filter_value(
+        message: Message, state: FSMContext, database, agent=None, settings=None
+    ):
+        data = await state.get_data()
+        field = data.get("field")
+        lang = await language(database, message.from_user.id)
+        if field not in FILTER_KEYS:
+            await state.set_state(None)
+            await respond(message, html(t("bot.expired", lang)), back_keyboard(lang, "filters"))
+            return
+        raw = message.text.strip()
+        value = raw[: 150 if field == "city" else 250] if raw else None
+        if field == "date":
+            try:
+                try:
+                    value = datetime.strptime(raw, "%d.%m.%Y").date().isoformat()
+                except ValueError:
+                    value = datetime.strptime(raw, "%Y-%m-%d").date().isoformat()
+            except ValueError:
+                await respond(message, html(t("bot.invalid_date", lang)), back_keyboard(lang, "filters"))
+                return
+        elif field == "max_price":
+            try:
+                amount = Decimal(raw.replace(",", "."))
+                if not amount.is_finite() or amount < 0 or amount > Decimal("100000000"):
+                    raise InvalidOperation
+                value = str(amount)
+            except InvalidOperation:
+                await respond(message, html(t("bot.invalid_price", lang)), back_keyboard(lang, "filters"))
+                return
+        values = {**data.get("filters", {}), field: value, "page": 1}
+        if field == "date":
+            values.pop("period", None)
+        if field == "max_price":
+            values.pop("is_free", None)
+        try:
+            SearchFilters(**values)
+        except ValidationError:
+            await respond(message, html(t("bot.invalid_category", lang)), back_keyboard(lang, "filters"))
+            return
+        await state.set_state(None)
+        await state.update_data(filters=values, field=None)
+        await search_results(message, state, database, agent, settings=settings)
