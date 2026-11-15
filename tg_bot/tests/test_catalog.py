@@ -99,3 +99,22 @@ async def test_row_isolation_rejection_and_audit_privacy(database):
         audits = list((await session.scalars(select(AuditLog))).all())
         assert len(audits) == 3
         assert all(len(a.actor) == 64 and "private@" not in json.dumps(a.details) for a in audits)
+
+
+@pytest.mark.asyncio
+async def test_dedup_merges_sources_and_stable_id(database):
+    async with database.sessions() as session:
+        await load(session, [event_row()])
+        first = (await SqlCatalogRepository(session).search(SearchFilters())).items[0]
+        update = event_row(
+            title="ТЕСТОВЫЙ  КОНЦЕРТ!",
+            source_url="https://example.invalid/second",
+            description="Обновлённое описание",
+        )
+        report = await load(session, [update])
+        assert report.updated == 1
+        result = (await SqlCatalogRepository(session).search(SearchFilters())).items[0]
+        assert result.id == first.id
+        assert len(result.sources) == 2
+        assert result.description == "Обновлённое описание"
+        assert (await load(session, [update])).unchanged == 1
