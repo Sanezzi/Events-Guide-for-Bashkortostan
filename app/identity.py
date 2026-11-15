@@ -41,3 +41,22 @@ def require_bot(request: Request):
     provided = request.headers.get("X-Internal-Token", "")
     if not expected or not hmac.compare_digest(expected.encode(), provided.encode()):
         raise HTTPException(401, "Нужен сервисный токен")
+
+
+def web_identity(request: Request, response: Response) -> str:
+    secret = request.app.state.session_secret
+
+    def signature(value):
+        return hmac.new(secret, value.encode(), sha256).hexdigest()
+
+    cookie = request.cookies.get("afisha_id", "")
+    identifier, _, signed = cookie.partition(".")
+    if len(identifier) != 32 or not hmac.compare_digest(signature(identifier), signed):
+        identifier = token_urlsafe(24)
+        response.set_cookie("afisha_id", f"{identifier}.{signature(identifier)}", httponly=True,
+                            secure=request.url.scheme == "https", samesite="strict", max_age=30 * 86400)
+    return f"web:{identifier}"
+
+
+def bot_identity(user_id: str) -> str:
+    return f"tg:{user_id}"
