@@ -294,3 +294,20 @@ class CultureAgentService:
         if c.route:
             return "По выбранным городу, датам, времени и бюджету маршрут из 2–4 непересекающихся событий не найден. Можно выбрать один пункт вместо двух или другой день; подходящие события не выдумываю."
         return "Подходящих событий нет по сочетанию выбранных города, даты, возраста, цены и ключевых слов. Не удалось установить одно мешающее ограничение; попробуйте другую дату или более широкий запрос."
+
+    async def _fallback(self, run: _Run, state: _Session, reason: str) -> AgentResponse:
+        run.trace.fallback_reason = reason[:300]
+        run.trace.plan.append("deterministic_repository_search")
+        if state.constraints.question:
+            return self._finish(run, state, text=state.constraints.question, question=state.constraints.question)
+        try:
+            if len(run.trace.tool_calls) < 5:
+                await self._execute(run, "search_events", state.constraints.query())
+            events = self._select(run, state, list(run.records.values()))
+            if not events:
+                return await self._finish_empty_search(run, state)
+            return self._finish(run, state, events)
+        except Exception as exc:
+            logger.warning("Culture agent fallback failed: %s", type(exc).__name__)
+            run.trace.fallback_reason = (reason + ";repository_" + type(exc).__name__)[:300]
+            return self._finish(run, state, text="Сейчас не удалось проверить афишу. Попробуйте ещё раз позже.")
