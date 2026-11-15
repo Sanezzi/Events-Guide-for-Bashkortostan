@@ -113,3 +113,20 @@ class SqlCatalogRepository:
             "title": Event.normalized_title,
         }[filters.sort]
         return stmt.order_by(sort_column, Event.date_start, Event.id)
+
+    def _normalized(self, expression):
+        if self.session.bind.dialect.name == "sqlite":
+            return func.catalog_normalize(expression)
+        unicode_text = expression.collate("pg_unicode_fast")
+        lowered = func.replace(func.lower(unicode_text), "ё", "е")
+        punctuation = func.regexp_replace(lowered, r"[^\w\s]", " ", "g")
+        return func.trim(func.regexp_replace(punctuation, r"\s+", " ", "g"))
+
+    async def _count(self, filters: SearchFilters) -> int:
+        query = self._query(filters).order_by(None).subquery()
+        return int(await self.session.scalar(select(func.count()).select_from(query)) or 0)
+
+    async def venues(self, city: str | None = None) -> list[str]:
+        query = self._query(SearchFilters(city=city, include_demo=False))
+        venues = query.with_only_columns(Event.venue).order_by(None).order_by(Event.venue).distinct()
+        return list(await self.session.scalars(venues))
