@@ -94,3 +94,17 @@ class Dialogues:
             state.history.extend((Message(role="user", content=message),
                                   Message(role="assistant", content=reply.reply_text)))
             return reply
+
+
+def chat_result(reply):
+    pending = reply.requires_confirmation
+    return {
+        "reply_text": reply.reply_text,
+        "events": [card.model_dump() for card in reply.events],
+        "clarifying_question": reply.clarifying_question,
+        "requires_confirmation": (
+            {"version": pending["version"], "expires_in_seconds": pending["expires_in_seconds"]}
+            if pending else None
+        ),
+        "is_fallback": reply.is_fallback,
+    }
