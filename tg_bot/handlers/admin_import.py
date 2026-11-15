@@ -130,3 +130,10 @@ def create_router() -> Router:
                 for error in report.errors[:20]
             )
             await send_long(message, t("bot.import_errors", lang) + "\n" + details, back_keyboard(lang))
+
+    @router.message(ImportFlow.document, ~F.text.startswith("/"))
+    async def expect_document(message: Message, database):
+        lang = await language(database, message.from_user.id)
+        await respond(message, html(t("bot.import_prompt", lang)), back_keyboard(lang))
+
+    return router
