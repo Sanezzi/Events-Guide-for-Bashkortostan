@@ -132,3 +132,37 @@ class AgentResponse(StrictModel):
     requires_confirmation: dict[str, Any] | None = None
     is_fallback: bool = False
     trace: AgentTrace = Field(default_factory=AgentTrace)
+
+
+class DateRangeArgs(StrictModel):
+    date_from: AwareDatetime | None = None
+    date_to: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def ordered_range(self) -> Self:
+        if self.date_from is not None and self.date_to is not None and self.date_to < self.date_from:
+            raise ValueError("date_to must be at least date_from")
+        return self
+
+
+class SearchEventsArgs(DateRangeArgs):
+    city: ShortText | None = None
+    category: Category | None = None
+    price_max: NonNegativeFloat | None = Field(default=None, description="Maximum upper ticket price, in RUB.")
+    is_free: bool | None = None
+    age_limit: Annotated[int, Field(ge=0, le=120)] | None = Field(default=None, description="Visitor/child age: event rating must not exceed this age.")
+    duration_max: Annotated[int, Field(gt=0, le=10080)] | None = None
+    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)] | None = None
+
+
+class GetEventArgs(StrictModel):
+    event_id: UUID
+
+
+class FindSimilarArgs(DateRangeArgs):
+    event_id: UUID
+    city: ShortText | None = None
+
+
+class VenueScheduleArgs(DateRangeArgs):
+    venue: ShortText
