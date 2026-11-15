@@ -98,3 +98,27 @@ async def run() -> None:
         await dispatcher.fsm.events_isolation.close()
         await bot.session.close()
         await database.close()
+
+
+async def send_notifications(bot, backend):
+    while True:
+        try:
+            pending = await backend.request("GET", "notifications")
+            for digest in pending:
+                user_id = digest["user_id"]
+                try:
+                    me = await bot.me()
+                    lines = [f'<a href="https://t.me/{me.username}?start=event_{event["id"]}">{escape(event["title"])}</a>'
+                             for event in digest["events"]]
+                    await bot.send_message(
+                        int(user_id), "Новые события по подписке:\n" + "\n".join(lines),
+                        reply_markup=back_keyboard(await backend.get_lang(str(user_id))),
+                    )
+                except TelegramForbiddenError:
+                    await backend.unsubscribe(user_id, digest["id"])
+                    continue
+                await backend.request("POST", "notifications/delivered", json={
+                    "user_id": user_id, "subscription_id": digest["id"], "through": digest["through"]})
+        except Exception as exc:
+            logger.warning("notification_cycle_failed", extra={"error_type": type(exc).__name__})
+        await asyncio.sleep(300)
