@@ -29,3 +29,23 @@ router = APIRouter(prefix="/api/v1/admin", tags=["admin"], dependencies=[Depends
 
 class StatusUpdate(BaseModel):
     status: Literal["опубликовано", "черновик", "отменено"]
+
+
+@router.get("/overview")
+async def overview(request: Request):
+    events = await request.app.state.catalog.events()
+    async with request.app.state.database.sessions() as session:
+        subs = await session.scalar(select(func.count()).select_from(Subscription))
+        feedback = await session.scalar(select(func.count()).select_from(Feedback))
+    return {
+        "events_total": len(events),
+        "published": sum(e.status == "опубликовано" for e in events),
+        "draft": sum(e.status == "черновик" for e in events),
+        "cancelled": sum(e.status == "отменено" for e in events),
+        "subscriptions": subs, "feedback": feedback,
+    }
+
+
+@router.get("/events", response_model=list[EventCard])
+async def admin_events(request: Request, status: Literal["опубликовано", "черновик", "отменено"] | None = None):
+    return await request.app.state.catalog.events(status=status)
