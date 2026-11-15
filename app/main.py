@@ -362,3 +362,8 @@ async def agent_message(body: AgentRequest):
     reply = await app.state.dialogues.ask(identity, f"{identity}:{body.session_id}", body.message,
                                           body.confirmation_version if body.confirm_action else None)
     return chat_result(reply)
+
+
+@app.get("/agent/health", tags=["service"])
+def agent_health():
+    return {"status": "ok", "mode": "llm" if app.state.agent.settings.api_key.strip() else "offline"}
