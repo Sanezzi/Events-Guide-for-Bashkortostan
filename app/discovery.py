@@ -64,3 +64,18 @@ def safe_link(value):
     except ValueError:
         pass
     return None
+
+
+def metadata(title, description, canonical, *, noindex=False, structured=None):
+    tags = [
+        f'<title>{escape(title)}</title>',
+        f'<meta name="description" content="{escape(description, quote=True)}">',
+        f'<link rel="canonical" href="{escape(canonical, quote=True)}">',
+        '<link rel="alternate" type="application/rss+xml" title="Афиша культуры Башкортостана" href="/rss.xml">',
+    ]
+    if noindex:
+        tags.append('<meta name="robots" content="noindex, follow">')
+    if structured:
+        data = json.dumps(structured, ensure_ascii=False).replace('<', '\\u003c')
+        tags.append(f'<script type="application/ld+json">{data}</script>')
+    return '\n'.join(tags)
