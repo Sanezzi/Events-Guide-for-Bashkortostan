@@ -246,3 +246,11 @@ class SqlCatalogRepository:
                 )
             ).all()
         )
+
+    async def unsubscribe(self, user_id: str, subscription_id: int | None = None) -> int:
+        stmt = delete(Subscription).where(Subscription.user_id == str(user_id))
+        if subscription_id is not None:
+            stmt = stmt.where(Subscription.id == subscription_id)
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        return result.rowcount
