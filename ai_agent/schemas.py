@@ -179,3 +179,13 @@ class FeedbackArgs(StrictModel):
     user_id: Identifier
     event_id: UUID
     text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+
+
+class ActionResult(StrictModel):
+    id: UUID
+    success: bool
+    message: LongText
+
+
+class SearchResult(StrictModel):
+    events: list[EventCard] = Field(default_factory=list, max_length=100)
