@@ -139,3 +139,27 @@ def source_link(base, link):
     if url.scheme not in {"http", "https"} or not host or url.username or url.password:
         return None
     return url._replace(fragment="").geturl()
+
+
+class ListingLinks(HTMLParser):
+    def __init__(self, page_url):
+        super().__init__()
+        self.page_url = page_url
+        self.host = urllib.parse.urlsplit(page_url).hostname
+        self.links = {}
+
+    def handle_starttag(self, tag, attrs):
+        if tag != "a":
+            return
+        link = source_link(self.page_url, dict(attrs).get("href"))
+        if not link:
+            return
+        target = urllib.parse.urlsplit(link)
+        if target.hostname == self.host and re.search(r"/(?:afisha|event|events|show)/[^/]+", target.path):
+            self.links.setdefault(link, None)
+
+
+def event_page_links(raw, page_url):
+    parser = ListingLinks(page_url)
+    parser.feed(raw)
+    return [url for url in parser.links if url.rstrip("/") != page_url.rstrip("/")][:30]
