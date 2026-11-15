@@ -94,3 +94,33 @@ def language_keyboard(lang: str) -> InlineKeyboardMarkup:
             back_row(lang),
         ]
     )
+
+
+def filters_keyboard(lang: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                button("bot.query", lang, "filter:q"),
+                button("bot.city", lang, "filter:city"),
+                button("bot.category", lang, "filter:category"),
+            ],
+            [
+                button("bot.today", lang, "period:today"),
+                button("bot.tomorrow", lang, "period:tomorrow"),
+            ],
+            [
+                button("bot.weekend", lang, "period:weekend"),
+                button("bot.week", lang, "period:week"),
+            ],
+            [
+                button("bot.date", lang, "filter:date"),
+                button("bot.max_price", lang, "filter:max_price"),
+            ],
+            [
+                button("bot.free", lang, "toggle:free"),
+                button("bot.bashkir", lang, "toggle:bashkir"),
+            ],
+            [button("bot.reset_filters", lang, "filters:reset")],
+            back_row(lang, "results"),
+        ]
+    )
