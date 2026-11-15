@@ -59,3 +59,16 @@ class LimitedBuffer(BytesIO):
         if self.tell() + len(data) > MAX_IMPORT_BYTES:
             raise ValueError("import exceeds size limit")
         return super().write(data)
+
+
+def create_router() -> Router:
+    router = Router(name="admin_import")
+
+    @router.message(Command("import"))
+    async def request_import(message: Message, state: FSMContext, database, settings):
+        lang = await language(database, message.from_user.id)
+        if message.from_user.id not in settings.admin_ids:
+            await respond(message, html(t("bot.import_denied", lang)), back_keyboard(lang))
+            return
+        await state.set_state(ImportFlow.document)
+        await respond(message, html(t("bot.import_prompt", lang)), back_keyboard(lang))
