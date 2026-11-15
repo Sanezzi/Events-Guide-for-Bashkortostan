@@ -452,3 +452,19 @@ def create_router() -> Router:
                                 session_id=str(query.message.chat.id), text="Подтверждаю",
                                 history=[], confirmation_version=version)
         await respond(query, html(reply.text), back_keyboard(lang, "agent"), edit=True)
+
+    @router.message(F.text, ~F.text.startswith("/"))
+    async def free_text(message: Message, state: FSMContext, database, agent=None, settings=None):
+        text = message.text.strip()[:2000]
+        if not text:
+            return
+        data = await state.get_data()
+        await state.update_data(agent_confirmation=None)
+        if await agent_search(message, state, database, agent, text, settings):
+            return
+        filters = {} if await state.get_state() == AgentFlow.query.state else data.get("filters", {})
+        await state.set_state(None)
+        await state.update_data(filters={**filters, "q": text[:250], "page": 1})
+        await search_results(message, state, database, agent, settings=settings)
+
+    return router
