@@ -59,3 +59,62 @@ export function Subscribe({ cities }: { cities: string[] }) {
     </div><OrnamentDivider/>
   </section>
 }
+
+export function Organizers({ cities, event }: { cities: string[]; event: EventCard | null }) {
+  const [fields, setFields] = useState({
+    title: '', city: '', venue: '', address: '', start: '', price: '0', age: '0',
+    category: 'концерт', source: '', details: '', website: '',
+  })
+  const [message, setMessage] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+  const field = (key: keyof typeof fields) => ({
+    value: fields[key], onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const value = e.target.value
+      setFields(old => ({ ...old, [key]: value }))
+    },
+  })
+  async function submit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setMessage('')
+    try {
+      const result = event
+        ? await api<{ message: string }>('/api/v1/feedback', json('POST', { event_id: event.id, text: fields.details + (fields.source ? '\nИсточник: ' + fields.source : ''), website: fields.website }))
+        : await api<{ message: string }>('/api/v1/event-submissions', json('POST', {
+          website: fields.website, event: {
+            title: fields.title, city: fields.city, venue: fields.venue, address: fields.address,
+            date_start: fields.start + ':00+05:00', price_min: Number(fields.price),
+            age_limit: Number(fields.age), category: fields.category, source_url: fields.source, description: fields.details,
+          },
+        }))
+      setMessage(result.message); setSent(true)
+    } catch (err) { setMessage((err as Error).message) }
+    finally { setBusy(false) }
+  }
+  return <section className="inner-page wrap">
+    <PageHead label="ДЛЯ ОРГАНИЗАТОРОВ" title={event ? 'Уточнить событие' : 'Расскажите о событии'}>Отправьте информацию модератору. Понадобится ссылка, по которой можно сверить данные.</PageHead>
+    <div className="two-col"><form className="panel form-grid" onSubmit={submit}>
+      <h2>{event ? event.title : 'Данные события'}</h2>
+      {!event && <>
+        <label>Название<input required maxLength={300} {...field('title')}/></label>
+        <label>Город<input list="organizer-cities" required maxLength={150} {...field('city')}/><datalist id="organizer-cities">{cities.map(c => <option key={c} value={c}/>)}</datalist></label>
+        <label>Площадка<input required maxLength={300} {...field('venue')}/></label>
+        <label>Адрес<input required maxLength={500} {...field('address')}/></label>
+        <label>Дата и время (местное)<input required type="datetime-local" {...field('start')}/></label>
+        <label>Жанр<select {...field('category')}>{categories.map(c => <option key={c} value={c}>{capital(c)}</option>)}<option value="другое">Другое</option></select></label>
+        <label>Цена билета, ₽<input required type="number" min="0" max="1000000" {...field('price')}/></label>
+        <label>Возрастной рейтинг<select {...field('age')}>{[0, 6, 12, 16, 18].map(n => <option key={n} value={n}>{n}+</option>)}</select></label>
+      </>}
+      <label>Ссылка на источник<input required={!event} type="url" maxLength={2048} {...field('source')}/></label>
+      <label>{event ? 'Что нужно изменить' : 'Описание'}<textarea required maxLength={event ? 1800 : 4000} rows={4} {...field('details')}/></label>
+      <div hidden aria-hidden="true"><label>Сайт<input tabIndex={-1} autoComplete="off" {...field('website')}/></label></div>
+      <button className="button button-amber" disabled={busy || sent}>{sent ? 'Отправлено' : 'Отправить на проверку'} {sent ? <Check size={18}/> : <Send size={17}/>}</button>
+      <p role="status">{message}</p>
+    </form><div className="panel live-preview"><p className="eyebrow">ПРЕДПРОСМОТР</p>
+      <h2>{event?.title || fields.title || 'Название события'}</h2>
+      <p className="mono">{event ? date(event.date_start) : fields.start ? fields.start.replace('T', ' · ') : 'Дата и время'} · {event?.age_limit ?? fields.age}+</p>
+      <p>{event ? event.city + ' · ' + event.venue : [fields.city, fields.venue].filter(Boolean).join(' · ') || 'Город и площадка'}</p>
+      {!event && <strong className="mono">{Number(fields.price) ? money(Number(fields.price)) : 'Бесплатно'}</strong>}
+      <p className="preview-description">{fields.details || (event ? 'Здесь появится ваше уточнение.' : 'Описание появится здесь.')}</p>
+    </div></div><OrnamentDivider/>
+  </section>
+}
