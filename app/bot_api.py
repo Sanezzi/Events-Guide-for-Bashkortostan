@@ -90,3 +90,15 @@ async def list_subscriptions(request: Request, body: BotUser):
 @router.post("/subscriptions/delete")
 async def unsubscribe(request: Request, body: Unsubscribe):
     return await request.app.state.catalog.unsubscribe(bot_identity(body.user_id), body.subscription_id)
+
+
+@router.post("/import", response_model=ImportReport)
+async def import_events(request: Request, filename: str, actor: str):
+    if not actor.isdecimal() or len(actor) > 20:
+        raise HTTPException(422, "Некорректный идентификатор модератора")
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > ImporterService.MAX_BYTES:
+            raise HTTPException(413, "Файл превышает 10 МиБ")
+    return await request.app.state.catalog.import_file(bytes(data), filename, f"tg:{actor}")
