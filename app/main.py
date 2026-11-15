@@ -401,3 +401,34 @@ async def event_page(request: Request, id: UUID | None = None):
                               noindex=not event, structured=discovery.event_schema(event, canonical) if event else None)
     detail = discovery.detail_html(event) if event else "Выберите событие в каталоге."
     return HTMLResponse(html.replace("<!-- metadata -->", meta, 1).replace("<!-- event -->", detail, 1))
+
+
+@app.get("/chat")
+def chat_page():
+    return FileResponse(PORTAL if PORTAL.is_file() else FRONTEND / "chat.html")
+
+
+@app.get("/about")
+def about_page():
+    return FileResponse(PORTAL if PORTAL.is_file() else FRONTEND / "about.html")
+
+
+@app.get("/admin")
+def admin_page():
+    return FileResponse(FRONTEND / "admin.html")
+
+
+@app.get("/subscribe")
+def subscribe_page():
+    return FileResponse(PORTAL if PORTAL.is_file() else FRONTEND / "subscribe.html")
+
+
+@app.get("/planner", include_in_schema=False)
+@app.get("/organizers", include_in_schema=False)
+def portal_page():
+    if not PORTAL.is_file():
+        raise HTTPException(404, "Соберите веб-интерфейс командой npm run build")
+    return FileResponse(PORTAL)
+
+
+app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
