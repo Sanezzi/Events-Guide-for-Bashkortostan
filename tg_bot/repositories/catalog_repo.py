@@ -130,3 +130,41 @@ class SqlCatalogRepository:
         query = self._query(SearchFilters(city=city, include_demo=False))
         venues = query.with_only_columns(Event.venue).order_by(None).order_by(Event.venue).distinct()
         return list(await self.session.scalars(venues))
+
+    async def search(self, filters: SearchFilters) -> SearchResult:
+        total = await self._count(filters)
+        stmt = (
+            self._query(filters)
+            .offset(filters.offset if filters.offset is not None else (filters.page - 1) * filters.page_size)
+            .limit(filters.page_size)
+        )
+        rows = (await self.session.scalars(stmt)).all()
+        explanation = None
+        if not total:
+            for field in (
+                "q",
+                "city",
+                "category",
+                "date",
+                "period",
+                "max_price",
+                "is_free",
+                "language",
+                "age",
+                "venue",
+                "date_from",
+                "date_to",
+                "duration_max",
+            ):
+                if getattr(filters, field) is not None:
+                    if await self._count(filters.model_copy(update={field: None})):
+                        explanation = field
+                        break
+            explanation = explanation or "combined"
+        return SearchResult(
+            items=[EventOut.model_validate(row) for row in rows],
+            total=total,
+            page=filters.page,
+            page_size=filters.page_size,
+            explanation=explanation,
+        )
