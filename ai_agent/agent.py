@@ -114,3 +114,40 @@ class CultureAgentService:
             session.append(first)
             user.append(second)
             return first, second
+
+    async def _completion(self, run: _Run, messages: list[dict]) -> Any:
+        # A blank key disables even an injected client, making offline mode explicit.
+        if not self.settings.api_key.strip():
+            raise ValueError("api_key_missing")
+        definitions = TOOLS
+        reservations = await self._reserve(run, messages, definitions)
+        try:
+            if self._client is None:
+                self._client = AsyncOpenAI(api_key=self.settings.api_key,
+                    base_url=self.settings.base_url, timeout=self.settings.timeout_seconds,
+                    max_retries=0)
+                self._owns_client = True
+            response = await asyncio.wait_for(self._client.chat.completions.create(
+                model=self.settings.model, messages=messages, tools=definitions,
+                tool_choice="auto",
+                max_tokens=self.settings.max_output_tokens), timeout=self.settings.timeout_seconds)
+        except Exception:
+            # Unknown provider usage after a timeout is charged at the reserved bound.
+            run.trace.cost_usd += reservations[0][1]
+            raise
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            incoming = max(0, int(getattr(usage, "prompt_tokens", 0) or 0))
+            outgoing = max(0, int(getattr(usage, "completion_tokens", 0) or 0))
+            run.trace.tokens_input += incoming
+            run.trace.tokens_output += outgoing
+            run.trace.total_tokens += incoming + outgoing
+            cost = (incoming * self.settings.input_usd_per_million +
+                    outgoing * self.settings.output_usd_per_million) / 1_000_000
+            async with self._budget_lock:
+                for row in reservations:
+                    row[1] = cost
+            run.trace.cost_usd += cost
+        else:
+            run.trace.cost_usd += reservations[0][1]
+        return response
