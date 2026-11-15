@@ -270,3 +270,59 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(filters={}, history=[])
         await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.callback_query(F.data.in_({"filters", "filters:reset"}))
+    async def filters(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        await state.set_state(None)
+        if query.data == "filters:reset":
+            await state.update_data(filters={}, history=[])
+        lang = await language(database, query.from_user.id)
+        data = await state.get_data()
+        await respond(
+            query,
+            html(filter_summary(data.get("filters", {}), lang)),
+            filters_keyboard(lang),
+            edit=True,
+        )
+
+    @router.callback_query(F.data.startswith("filter:"))
+    async def choose_filter(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        field = query.data.split(":", 1)[1]
+        if field not in FILTER_KEYS:
+            return
+        if field == "category":
+            await state.set_state(None)
+            lang = await language(database, query.from_user.id)
+            await respond(query, html(t("bot.category", lang)), categories_keyboard(lang), edit=True)
+            return
+        await state.set_state(SearchFlow.value)
+        await state.update_data(field=field)
+        lang = await language(database, query.from_user.id)
+        prompt = t("bot.enter_value", lang) + "\n" + t(FILTER_KEYS[field], lang)
+        if field == "date":
+            prompt += " · DD.MM.YYYY"
+        await respond(query, html(prompt), back_keyboard(lang, "filters"), edit=True)
+
+    @router.callback_query(F.data.startswith("category:"))
+    async def category(
+        query: CallbackQuery, state: FSMContext, database, agent=None, settings=None
+    ):
+        await answer_callback(query)
+        argument = query.data.split(":", 1)[1]
+        try:
+            options = get_args(Category)
+            if argument == "all":
+                value = None
+            else:
+                index = int(argument)
+                if not 0 <= index < len(options):
+                    return
+                value = options[index]
+        except (ValueError, IndexError):
+            return
+        data = await state.get_data()
+        await state.set_state(None)
+        await state.update_data(filters={**data.get("filters", {}), "category": value, "page": 1})
+        await search_results(query, state, database, agent, edit=True, settings=settings)
