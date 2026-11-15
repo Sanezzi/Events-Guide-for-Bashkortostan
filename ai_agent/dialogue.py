@@ -202,3 +202,38 @@ def parse(message: str, old: Constraints, now: datetime, previous: list[EventCar
     if quoted and not ("подпис" in s or "отзыв" in s):
         c.text = quoted[1]
     return c
+
+
+def eligible(e: EventCard, c: Constraints, now: datetime) -> bool:
+    if e.status != "опубликовано" or e.id in c.exclude or e.date_start < now:
+        return False
+    if c.city and e.city.casefold() != c.city.casefold():
+        return False
+    if c.category and e.category != c.category:
+        return False
+    if c.text:
+        tokens = re.findall(r"[^\W_]+", c.text.casefold().replace("ё", "е"))
+        tokens = [t for t in tokens if len(t) >= 2 and t not in {"в", "на", "и", "или", "для", "до", "от", "покажи", "найди"}]
+        haystack = " ".join([e.title, e.description, e.city, e.venue, e.category, *e.tags]).casefold().replace("ё", "е")
+        if not tokens or any(t not in haystack for t in tokens):
+            return False
+    if c.date_from and e.date_start < c.date_from or c.date_to and e.date_start > c.date_to:
+        return False
+    if c.age is not None and e.age_limit > c.age:
+        return False
+    if c.is_free and not e.is_free:
+        return False
+    if c.budget is not None and e.price_max * c.party > c.budget:
+        return False
+    if c.duration_max is not None and (e.duration_min is None or e.duration_min > c.duration_max):
+        return False
+    if c.start_after is not None and e.date_start.astimezone(now.tzinfo).time() < c.start_after:
+        return False
+    if c.end_hour is not None:
+        if e.date_end is None:
+            return False
+        end = e.date_end.astimezone(now.tzinfo)
+        start = e.date_start.astimezone(now.tzinfo)
+        if end.date() != start.date() or (end.hour, end.minute) > (c.end_hour, c.end_minute):
+            return False
+    return True
