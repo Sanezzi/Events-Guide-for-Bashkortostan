@@ -134,3 +134,29 @@ async def admin_feedback(request: Request):
     async with request.app.state.database.sessions() as session:
         rows = await session.scalars(select(Feedback).order_by(Feedback.created_at.desc()).limit(100))
         return [{"id": row.id, "event_id": row.event_id, "text": row.text} for row in rows]
+
+
+@router.get("/traces/{session_id}")
+async def admin_trace(request: Request, session_id: str):
+    async with request.app.state.database.sessions() as session:
+        match = StoredTrace.session_ref == session_id
+        try:
+            trace_id = UUID(session_id)
+        except ValueError:
+            pass
+        else:
+            match = match | (StoredTrace.id == trace_id)
+        row = await session.scalar(select(StoredTrace).where(match)
+                                   .order_by(StoredTrace.created_at.desc()).limit(1))
+    if row is None:
+        raise HTTPException(404, "Трасса не найдена")
+    return row.payload
+
+
+@router.get("/traces")
+async def admin_traces(request: Request):
+    async with request.app.state.database.sessions() as session:
+        rows = await session.scalars(select(StoredTrace).order_by(StoredTrace.created_at.desc()).limit(30))
+        return [{"id": row.id, "session_id": row.session_ref, "created_at": row.created_at,
+                 "event_ids": row.payload.get("event_ids", []),
+                 "latency_ms": row.payload.get("latency_ms", 0)} for row in rows]
