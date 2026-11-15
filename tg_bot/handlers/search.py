@@ -403,3 +403,23 @@ def create_router() -> Router:
         await state.set_state(None)
         await state.update_data(filters=values)
         await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.callback_query(F.data == "results")
+    async def results(query: CallbackQuery, state: FSMContext, database, agent=None, settings=None):
+        await answer_callback(query)
+        await state.set_state(None)
+        await search_results(query, state, database, agent, edit=True, settings=settings)
+
+    @router.callback_query(F.data.startswith("page:"))
+    async def page(query: CallbackQuery, state: FSMContext, database, agent=None, settings=None):
+        await answer_callback(query)
+        try:
+            number = int(query.data.split(":", 1)[1])
+            if not 1 <= number <= 100000:
+                return
+        except ValueError:
+            return
+        data = await state.get_data()
+        await state.set_state(None)
+        await state.update_data(filters={**data.get("filters", {}), "page": number})
+        await search_results(query, state, database, agent, edit=True, settings=settings)
