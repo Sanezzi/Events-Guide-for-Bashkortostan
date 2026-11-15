@@ -171,3 +171,30 @@ async def health():
 @app.get("/metrics", tags=["service"])
 def metrics():
     return app.state.metrics
+
+
+@app.get("/api/v1/events/search", response_model=SearchResult, tags=["events"])
+@app.get("/api/v1/events", response_model=SearchResult, tags=["events"])
+async def list_events(
+    city: str | None = Query(None, max_length=150),
+    venue: str | None = Query(None, max_length=300),
+    category: Category | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+    price_max: float | None = Query(None, ge=0, allow_inf_nan=False),
+    is_free: bool | None = None,
+    age_limit: int | None = Query(None, ge=0, le=120),
+    duration_max: int | None = Query(None, gt=0, le=10080),
+    text: str | None = Query(None, max_length=2000),
+    sort: Literal["date_start", "price_min", "price_max", "price_max_desc", "title"] = "date_start",
+    period: Literal["today", "tomorrow", "weekend", "week"] | None = None,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    if date_from and date_to and aware(date_from) > aware(date_to):
+        raise HTTPException(422, "Начало периода позже окончания")
+    args = SearchEventsArgs(city=city, venue=venue, category=category, date_from=aware(date_from) if date_from else None,
+                           date_to=aware(date_to) if date_to else None, price_max=price_max, is_free=is_free,
+                           age_limit=age_limit, duration_max=duration_max, text=text)
+    cards, total, reason = await app.state.catalog.filtered(args, page_size=limit, offset=offset, sort=sort, period=period)
+    return SearchResult(events=cards, total=total, limit=limit, offset=offset, explanation=reason)
