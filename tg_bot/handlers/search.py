@@ -235,3 +235,23 @@ async def agent_search(
             await render_event(message, event, lang, settings, screen="agent-summary")
         return True
     return bool(reply.text)
+
+
+def create_router() -> Router:
+    router = Router(name="search")
+
+    async def show_assistant(target, state: FSMContext, database, *, edit=False):
+        await state.set_state(AgentFlow.query)
+        await state.update_data(agent_confirmation=None)
+        lang = await language(database, target.from_user.id)
+        prompt = f"<b>{html(t('bot.agent', lang))}</b>\n\n{html(t('bot.agent_prompt', lang))}"
+        await respond(target, prompt, back_keyboard(lang), edit=edit)
+
+    @router.message(Command("ai"))
+    async def assistant_command(message: Message, state: FSMContext, database):
+        await show_assistant(message, state, database)
+
+    @router.callback_query(F.data == "agent")
+    async def assistant(query: CallbackQuery, state: FSMContext, database):
+        await answer_callback(query)
+        await show_assistant(query, state, database, edit=True)
