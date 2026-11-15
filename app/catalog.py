@@ -88,3 +88,15 @@ class Catalog:
                 await session.refresh(row)
                 await session.commit()
             return public_card(row)
+
+    async def subscribe(self, user_id, city, category, period="weekly"):
+        async with self.database.sessions() as session:
+            return await SqlCatalogRepository(session).subscribe(user_id, city, category, period)
+
+    async def subscriptions(self, user_id):
+        async with self.database.sessions() as session:
+            return await SqlCatalogRepository(session).list_subscriptions(user_id)
+
+    async def unsubscribe(self, user_id, subscription_id=None):
+        async with self.database.sessions() as session:
+            return await SqlCatalogRepository(session).unsubscribe(user_id, subscription_id)
