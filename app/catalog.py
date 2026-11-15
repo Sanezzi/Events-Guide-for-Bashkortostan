@@ -100,3 +100,17 @@ class Catalog:
     async def unsubscribe(self, user_id, subscription_id=None):
         async with self.database.sessions() as session:
             return await SqlCatalogRepository(session).unsubscribe(user_id, subscription_id)
+
+    async def feedback(self, user_id, event_id, text):
+        async with self.database.sessions() as session:
+            event = await SqlCatalogRepository(session).get_event(event_id)
+            if event is None or event.is_demo:
+                return None
+            row = Feedback(user_id=user_id, event_id=event_id, text=text)
+            session.add(row)
+            await session.commit()
+            return row.id
+
+
+def subscription_uuid(row):
+    return uuid5(NAMESPACE_URL, f"afisha:subscription:{row.user_id}:{row.id}")
