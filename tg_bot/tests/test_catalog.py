@@ -118,3 +118,24 @@ async def test_dedup_merges_sources_and_stable_id(database):
         assert len(result.sources) == 2
         assert result.description == "Обновлённое описание"
         assert (await load(session, [update])).unchanged == 1
+
+
+@pytest.mark.asyncio
+async def test_cancelled_and_drafts_visibility_pagination_and_stats(database):
+    async with database.sessions() as session:
+        rows = [
+            event_row(title=str(i), status=status, price_min=0, price_max=0)
+            for i, status in enumerate(["опубликовано", "опубликовано", "отменено", "черновик"])
+        ]
+        await load(session, rows)
+        repo = SqlCatalogRepository(session)
+        result = await repo.search(SearchFilters(page_size=1, page=2, is_free=True))
+        assert result.total == 2 and len(result.items) == 1
+        all_rows = list((await session.scalars(select(Event))).all())
+        cancelled = next(row for row in all_rows if row.status == "отменено")
+        draft = next(row for row in all_rows if row.status == "черновик")
+        assert (await repo.get_event(cancelled.id)).status == "отменено"
+        assert await repo.get_event(draft.id) is None
+        assert await repo.get_event(uuid4()) is None
+        assert await repo.stats() == {"total": 2, "free": 2, "cities": ["Уфа"]}
+        assert (await repo.search(SearchFilters(age=5))).total == 0
