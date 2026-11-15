@@ -310,3 +310,8 @@ async def test_periods_and_past_exclusion(database, monkeypatch):
         assert (await repo.search(SearchFilters(period="tomorrow"))).total == 1
         assert (await repo.search(SearchFilters(period="week"))).total == 2
         assert (await repo.search(SearchFilters())).total == 2
+
+
+def test_postgres_schema_compiles():
+    for table in Event.metadata.sorted_tables:
+        assert "CREATE TABLE" in str(CreateTable(table).compile(dialect=postgresql.dialect()))
