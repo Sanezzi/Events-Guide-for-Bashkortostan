@@ -34,3 +34,10 @@ async def session_secret(database) -> bytes:
                 raise
             return row.value.encode()
         return generated.encode()
+
+
+def require_bot(request: Request):
+    expected = os.environ.get("INTERNAL_API_TOKEN", "")
+    provided = request.headers.get("X-Internal-Token", "")
+    if not expected or not hmac.compare_digest(expected.encode(), provided.encode()):
+        raise HTTPException(401, "Нужен сервисный токен")
