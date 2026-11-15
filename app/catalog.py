@@ -64,3 +64,27 @@ class Catalog:
         )
         result = await self.search(filters)
         return [public_card(row) for row in result.items], result.total, result.explanation
+
+    async def import_file(self, data: bytes, name: str, actor: str, *, merge_existing=True,
+                          preserve_reviewed=False):
+        async with self.database.sessions() as session:
+            return await ImporterService(session).import_bytes(
+                data, name, actor=actor, merge_existing=merge_existing, preserve_reviewed=preserve_reviewed
+            )
+
+    async def status(self, event_id: UUID, status: str, actor: str):
+        async with self.database.sessions() as session:
+            row = await session.get(Event, event_id, with_for_update=True)
+            if row is None:
+                return None
+            if row.status != status:
+                previous = row.status
+                row.status = status
+                session.add(AuditLog(
+                    action="moderation", actor=digest(actor), event_id=row.id,
+                    details={"status": {"before": previous, "after": status}},
+                ))
+                await session.flush()
+                await session.refresh(row)
+                await session.commit()
+            return public_card(row)
