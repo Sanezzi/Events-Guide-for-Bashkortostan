@@ -196,3 +196,22 @@ def test_api_errors_widget_and_service_auth(client):
     widget = client.get("/widget")
     assert "X-Frame-Options" not in widget.headers
     assert "frame-ancestors 'self'" not in widget.headers["Content-Security-Policy"]
+
+
+def test_agent_write_requires_current_version_and_owner(client):
+    response = client.post("/api/chat", json={"session_id": "same", "message": "Подпиши меня на Уфу"})
+    assert response.status_code == 200
+    version = response.json()["requires_confirmation"]["version"]
+    assert client.get("/api/v1/subscriptions").json() == []
+    confirmation = {"session_id": "same", "message": "Подтверждаю", "confirm_action": True}
+    response = client.post("/api/chat", json={**confirmation, "confirmation_version": "old"})
+    assert "изменилось" in response.json()["reply_text"]
+    assert client.get("/api/v1/subscriptions").json() == []
+    response = client.post("/api/chat", json={**confirmation, "confirmation_version": version})
+    assert response.json()["reply_text"] == "Подписка сохранена."
+    subscriptions = client.get("/api/v1/subscriptions").json()
+    assert len(subscriptions) == 1
+    response = client.post("/api/chat", json={**confirmation, "confirmation_version": version})
+    assert "Нет действующего" in response.json()["reply_text"]
+    client.cookies.clear()
+    assert client.delete(f"/api/v1/subscriptions/{subscriptions[0]['id']}").status_code == 404
