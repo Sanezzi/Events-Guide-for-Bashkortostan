@@ -350,3 +350,15 @@ async def chat(body: ChatInput, request: Request, response: Response):
     result = await app.state.dialogues.ask(identity, body.session_id, body.message,
                                            body.confirmation_version if body.confirm_action else None)
     return chat_result(result)
+
+
+@app.post("/agent/message", include_in_schema=False, dependencies=[Depends(require_bot)])
+async def agent_message(body: AgentRequest):
+    if not body.user_id.isdecimal() or len(body.user_id) > 20 or len(body.session_id) > 80:
+        raise HTTPException(422, "Некорректный идентификатор сессии")
+    if body.confirm_action and not body.confirmation_version:
+        raise HTTPException(422, "Требуется версия подтверждения")
+    identity = bot_identity(body.user_id)
+    reply = await app.state.dialogues.ask(identity, f"{identity}:{body.session_id}", body.message,
+                                          body.confirmation_version if body.confirm_action else None)
+    return chat_result(reply)
