@@ -113,3 +113,16 @@ def build_fragment(*, title, city, venue, address, source_url, page_text, catego
     }
     EventCard.model_validate_json(json.dumps({k: v for k, v in item.items() if k != '_verified'}, ensure_ascii=False))
     return item
+
+def dedup(items):
+    seen, out = set(), []
+    for e in items:
+        k = e.get('dedup_key') or (fold(e['title']), e['date_start'], fold(e['venue']))
+        if k in seen:
+            continue
+        seen.add(k); out.append(e)
+    return out
+
+def collect_official_page(url, city, venue, address, title, **kw):
+    text = strip_html(fetch_text(url))
+    return build_fragment(title=title, city=city, venue=venue, address=address, source_url=url, page_text=text, **kw)
