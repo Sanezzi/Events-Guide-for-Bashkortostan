@@ -47,3 +47,24 @@ def test_broad_request_lists_events_across_bashkortostan(client):
         assert not data["clarifying_question"]
         assert not data["is_fallback"]
         assert {event["city"] for event in data["events"]} == {"Уфа", "Стерлитамак"}
+
+
+def test_organizer_proposals_require_moderation_and_resist_duplicates(client):
+    card = dict(title="Предложение организатора", category="спектакль", city="Уфа",
+                address="Улица 1", venue="Сцена", description="Описание",
+                date_start=(datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
+                age_limit=6, price_min=150, source_url="https://organizer.example/event")
+    endpoint = "/api/v1/event-submissions"
+    assert client.post(endpoint, json={"event": card, "website": "spam"}).status_code == 422
+    assert client.post(endpoint, json={"event": {**card, "source_url": "javascript:bad"}}).status_code == 422
+    response = client.post(endpoint, json={"event": card})
+    assert response.status_code == 201
+    event_id = response.json()["id"]
+    assert client.get(f"/api/v1/events/{event_id}").status_code == 404
+    assert client.post(endpoint, json={"event": card}).status_code == 409
+    headers = {"X-Admin-Token": "test-admin"}
+    response = client.get("/api/v1/admin/events?status=черновик", headers=headers)
+    assert [event["id"] for event in response.json()] == [event_id]
+    assert client.patch(f"/api/v1/admin/events/{event_id}/status", headers=headers,
+                        json={"status": "опубликовано"}).status_code == 200
+    assert client.post("/api/v1/feedback", json={"event_id": event_id, "text": "Новое время"}).status_code == 200
