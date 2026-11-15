@@ -118,3 +118,31 @@ export function Organizers({ cities, event }: { cities: string[]; event: EventCa
     </div></div><OrnamentDivider/>
   </section>
 }
+
+export function About({ cities }: { cities: string[] }) {
+  const [city, setCity] = useState('')
+  const [category, setCategory] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
+  const query = new URLSearchParams()
+  if (city) query.set('city', city)
+  if (category) query.set('category', category)
+  const embed = location.origin + '/widget' + (query.size ? '?' + query : '')
+  const html = `<iframe src="${embed.replaceAll('&', '&amp;')}" title="Афиша культуры Башкортостана" width="100%" height="480" loading="lazy" style="border:0"></iframe>`
+  async function copy() {
+    try { await navigator.clipboard.writeText(html); setCopied(true); setCopyError(false) }
+    catch { setCopyError(true) }
+  }
+  return <section className="inner-page wrap">
+    <PageHead label="О ПРОЕКТЕ" title="Афиша республики">Независимый агрегатор культурных событий Башкортостана.</PageHead>
+    <div className="two-col"><article className="panel"><h2><Link2/> Откуда берём данные</h2><p>Каталог пополняется из афиш организаторов, билетных сервисов и импортированных файлов. Собранные записи поступают на проверку. Ссылка на источник доступна в каждой карточке.</p><p>Даты, цены и наличие билетов могут меняться. Перед поездкой сверьте их у организатора.</p></article>
+    <article className="panel form-grid"><h2><Code2/> Виджет для вашего сайта</h2>
+      <label>Город<select value={city} onChange={e => { setCity(e.target.value); setCopied(false) }}><option value="">Все города</option>{cities.map(c => <option key={c}>{c}</option>)}</select></label>
+      <label>Жанр<select value={category} onChange={e => { setCategory(e.target.value); setCopied(false) }}><option value="">Все жанры</option>{categories.map(c => <option key={c} value={c}>{capital(c)}</option>)}</select></label>
+      <label>HTML-код<textarea readOnly rows={3} value={html} onFocus={e => e.target.select()}/></label>
+      <button className="button button-forest" onClick={copy}>{copied ? 'Скопировано' : 'Копировать HTML'} {copied ? <Check size={17}/> : <Copy size={17}/>}</button>
+      {copyError && <p role="status">Выделите и скопируйте код из поля.</p>}
+      <iframe className="embed-preview" title="Предпросмотр виджета" src={embed} loading="lazy"/>
+    </article></div><OrnamentDivider/>
+  </section>
+}
