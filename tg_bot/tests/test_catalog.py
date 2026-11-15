@@ -186,3 +186,26 @@ async def test_subscription_dedup_ownership_and_language_persistence(database):
 def test_validation_rejects_inconsistent_fields(changes):
     with pytest.raises(ValidationError):
         EventInput.model_validate(event_row(**changes))
+
+
+@pytest.mark.asyncio
+async def test_csv_import_with_tags_and_row_rejection(database):
+    stream = io.StringIO()
+    rows = [event_row(tags="дети,музыка"), event_row(title="bad", price_min=-1, tags="[]")]
+    writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+    writer.writeheader()
+    writer.writerows(rows)
+    async with database.sessions() as session:
+        report = await ImporterService(session).import_bytes(
+            stream.getvalue().encode("utf-8-sig"), "events.csv"
+        )
+        assert (report.added, report.rejected) == (1, 1)
+        assert {"дети", "музыка", "концерт", "6+"} <= set(
+            (await SqlCatalogRepository(session).search(SearchFilters())).items[0].tags
+        )
+        assert (
+            await ImporterService(session).import_bytes(stream.getvalue().encode(), "events.csv")
+        ).unchanged == 1
+        assert (await ImporterService(session).import_bytes(b"bad", "events.json")).errors[0][
+            "code"
+        ] == "invalid_file"
