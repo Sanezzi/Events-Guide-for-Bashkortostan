@@ -1,0 +1,1094 @@
+[
+  {
+    "id": "b6f1a001-0021-4000-8000-000000000021",
+    "title": "Марсель Кутуев",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-24T19:00:00+05:00",
+    "date_end": "2026-11-24T21:00:00+05:00",
+    "duration_min": 120,
+    "city": "Сибай",
+    "venue": "Сибайское концертно-театральное объединение, Большой зал",
+    "address": "Сибай",
+    "description": "Концерт. Дата 24 ноября 19:00, возраст 6+, длительность 2 ч и цена от 600 ₽ проверены на официальной карточке sibay-concert.ru.",
+    "price_min": 600.0,
+    "price_max": 600.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://votkuda.ru/event/marsel-kutuev-21451/",
+    "sources": [
+      "https://votkuda.ru/event/marsel-kutuev-21451/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0022-4000-8000-000000000022",
+    "title": "Благотворительный концерт «Музыка, которая помогает»",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "благотворительность"
+    ],
+    "date_start": "2026-11-25T19:00:00+05:00",
+    "date_end": "2026-11-25T21:00:00+05:00",
+    "duration_min": 120,
+    "city": "Сибай",
+    "venue": "Сибайское концертно-театральное объединение, Большой зал",
+    "address": "Сибай",
+    "description": "Благотворительный концерт. Дата 25 ноября 19:00, возраст 12+, длительность 2 ч и цена от 1000 ₽ проверены на официальной карточке sibay-concert.ru.",
+    "price_min": 1000.0,
+    "price_max": 1000.0,
+    "is_free": false,
+    "age_limit": 12,
+    "source_url": "https://sibay-concert.ru/afisha/blagotvoritelnyj-konczert/",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0023-4000-8000-000000000023",
+    "title": "Иркэ",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-12-03T19:00:00+05:00",
+    "date_end": "2026-12-03T21:00:00+05:00",
+    "duration_min": 120,
+    "city": "Сибай",
+    "venue": "Сибайское концертно-театральное объединение, Большой зал",
+    "address": "Сибай",
+    "description": "Концерт. Дата 3 декабря 19:00, возраст 6+, длительность 2 ч и цена от 1100 ₽ проверены на официальной карточке sibay-concert.ru.",
+    "price_min": 1100.0,
+    "price_max": 1100.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://rolld.ru/event/irke-sibai",
+    "sources": [
+      "https://rolld.ru/event/irke-sibai"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0024-4000-8000-000000000024",
+    "title": "Матурлыҡтан тыуған моң",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "на башкирском языке"
+    ],
+    "date_start": "2026-12-09T19:00:00+05:00",
+    "date_end": "2026-12-09T21:00:00+05:00",
+    "duration_min": 120,
+    "city": "Сибай",
+    "venue": "Сибайское концертно-театральное объединение",
+    "address": "Сибай",
+    "description": "Концерт на башкирском языке. Дата 9 декабря 19:00, площадка Сибайское КТО, возраст 6+, длительность 2 ч и цена от 700 ₽ проверены на официальной карточке sibay-concert.ru.",
+    "price_min": 700.0,
+    "price_max": 700.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://sibay-concert.ru/afisha/maturlyktantyuganmon/",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0031-4000-8000-000000000031",
+    "title": "Ильнат Фархуллин",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-16T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Концерт, новая программа. Дата 16.11.2026 19:00, возраст 6+ и цена 1000 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 1000.0,
+    "price_max": 1000.0,
+    "is_free": false,
+    "age_limit": 6,
+    "org_link": "https://iframeab-pre4839.intickets.ru/node/75697214",
+    "source_url": "https://iframeab-pre4839.intickets.ru/node/75697214",
+    "sources": [
+      "https://iframeab-pre4839.intickets.ru/node/75697214"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0032-4000-8000-000000000032",
+    "title": "Азат Бакиев — «Музыка моей жизни»",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-17T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Концерт «Музыка моей жизни», Пушкинская карта. Дата 17.11.2026 19:00, возраст 12+ и цена 500 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 500.0,
+    "price_max": 500.0,
+    "is_free": false,
+    "age_limit": 12,
+    "source_url": "https://filarmonia-uchaly.ru/afisha.html",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0033-4000-8000-000000000033",
+    "title": "Бер ғүмер етмәй икән…",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "драма"
+    ],
+    "date_start": "2026-11-18T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Драматическая поэма Национального молодежного театра РБ им. М. Карима, Пушкинская карта. Дата 18.11.2026 19:00, возраст 12+ и цена 800 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 800.0,
+    "price_max": 800.0,
+    "is_free": false,
+    "age_limit": 12,
+    "source_url": "https://teatrnmt.ru/novosti/v-teatre-projdet-osobennyj-pokaz-spektaklya-ber-%D2%93%D2%AFmer-etm%D3%99j-ik%D3%99n/",
+    "sources": [
+      "https://teatrnmt.ru/novosti/v-teatre-projdet-osobennyj-pokaz-spektaklya-ber-%D2%93%D2%AFmer-etm%D3%99j-ik%D3%99n/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0034-4000-8000-000000000034",
+    "title": "Саид Билалов — шоу-программа «Аҙымдар»",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "шоу"
+    ],
+    "date_start": "2026-11-21T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Шоу-программа «Аҙымдар». Дата 21.11.2026 19:00, возраст 6+ и цена 700 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 700.0,
+    "price_max": 700.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://filarmonia-uchaly.ru/afisha.html",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0035-4000-8000-000000000035",
+    "title": "Голоса",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-26T14:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Концерт, Пушкинская карта. Дата 26.11.2026 14:00, возраст 6+ и цена 600 ₽ проверены на официальной афише Учалинской филармонии; второй сеанс в тот же день в 16:00 не дублирую.",
+    "price_min": 600.0,
+    "price_max": 600.0,
+    "is_free": false,
+    "age_limit": 6,
+    "org_link": "https://quicktickets.ru/uchaly-filarmoniya/s100?min=1",
+    "source_url": "https://quicktickets.ru/uchaly-filarmoniya/s100?min=1",
+    "sources": [
+      "https://quicktickets.ru/uchaly-filarmoniya/s100?min=1"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0036-4000-8000-000000000036",
+    "title": "Зинира и Ризат Рамазановы",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-30T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Концерт. Дата 30.11.2026 19:00, возраст 6+ и цена 1200 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 1200.0,
+    "price_max": 1200.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://ramazanovlar.ru/",
+    "sources": [
+      "https://ramazanovlar.ru/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0037-4000-8000-000000000037",
+    "title": "Зинира и Ризат Рамазановы",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-12-01T19:00:00+05:00",
+    "city": "Учалы",
+    "venue": "Учалинская филармония",
+    "address": "Учалы, ул. Ленина, 27",
+    "description": "Концерт. Дата 01.12.2026 19:00, возраст 6+ и цена 1200 ₽ проверены на официальной афише Учалинской филармонии.",
+    "price_min": 1200.0,
+    "price_max": 1200.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://ramazanovlar.ru/",
+    "sources": [
+      "https://ramazanovlar.ru/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0041-4000-8000-000000000041",
+    "title": "«КЕЙӘҮҘӘР» / «ЖЕНИХИ»",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "комедия"
+    ],
+    "date_start": "2026-11-18T19:00:00+05:00",
+    "city": "Ишимбай",
+    "venue": "Ишимбайский Дворец культуры",
+    "address": "Ишимбай",
+    "description": "Музыкальная комедия по пьесе Х. Вахита, режиссёр Ф. Гарипов. Дата 18.11.2026 19:00, возраст 12+ и цена 700 ₽ проверены на официальной карточке ishimba i-kdc.ru.",
+    "price_min": 700.0,
+    "price_max": 700.0,
+    "is_free": false,
+    "age_limit": 12,
+    "source_url": "https://ishimbai-kdc.ru/afisha/2026/11/7384/",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "c3e37da7-4b83-576e-ae22-b3e018fd30b4",
+    "title": "«Наша слава — русская держава»!",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-11-20T19:00:00+05:00",
+    "city": "Бирск",
+    "venue": "Городской дворец культуры г. Бирск",
+    "address": "г. Бирск, ул. Ленина, 69",
+    "description": "Концерт Народного хора «Русская песня». Дата 20 ноября 19:00, возраст 0+ и цена 400 ₽ проверены на официальной странице ГДК г. Бирск.",
+    "price_min": 400.0,
+    "price_max": 400.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://birskgdk.ru/afisha/2026/10/8552/",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "d88f9fd5-3f64-52e4-8c10-ae4d38a16444",
+    "title": "«Гордимся подвигами, чтим героев»",
+    "category": "концерт",
+    "tags": [
+      "концерт"
+    ],
+    "date_start": "2026-12-09T16:00:00+05:00",
+    "city": "Бирск",
+    "venue": "Городской дворец культуры г. Бирск",
+    "address": "г. Бирск, ул. Ленина, 69",
+    "description": "Торжественный концерт ко Дню Героев Отечества. Дата 9 декабря 16:00, вход свободный, возраст 6+ проверены на официальной странице ГДК г. Бирск.",
+    "price_min": 0.0,
+    "price_max": 0.0,
+    "is_free": true,
+    "age_limit": 6,
+    "source_url": "https://birskgdk.ru/afisha/2026/11/8590/",
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "0f3fbb87-30c6-5cc0-a502-027a02023461",
+    "title": "Человек из Мумбаи",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "комедия"
+    ],
+    "date_start": "2026-11-26T19:00:00+05:00",
+    "date_end": "2026-11-26T21:00:00+05:00",
+    "duration_min": 120,
+    "city": "Нефтекамск",
+    "venue": "Нефтекамская государственная филармония, Концертный зал",
+    "address": "Нефтекамск, ул. Ленина, 9",
+    "description": "Спектакль, комедия, 16+. Дата 26 ноября 19:00-21:00, возраст 16+ и цена 600-1000 ₽ проверены на странице официальной кассы Кассы.ру; дата и время также на официальной афише neft-gf.ru.",
+    "price_min": 600.0,
+    "price_max": 1000.0,
+    "is_free": false,
+    "age_limit": 16,
+    "org_link": "https://ufa.kassy.ru/events/teatr/2-25496/",
+    "source_url": "https://ufa.kassy.ru/events/teatr/2-25496/",
+    "sources": [
+      "https://ufa.kassy.ru/events/teatr/2-25496/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0002-4000-8000-000000000002",
+    "title": "Ансамбль русских народных инструментов «Забава» — «Там, где поет душа»",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "народная музыка"
+    ],
+    "date_start": "2026-11-20T19:00:00+05:00",
+    "city": "Уфа",
+    "venue": "Башкирская государственная филармония, Малый (органный) зал",
+    "address": "Уфа, ул. Гоголя, 58",
+    "description": "Бесплатный концерт. Дата и цена с официальной афиши bashgf.ru.",
+    "price_min": 0.0,
+    "price_max": 0.0,
+    "is_free": true,
+    "age_limit": 0,
+    "source_url": "https://bashgf.ru/afisha/event/ansambl-russkih-narodnyh-instrumentov-zabava-2/",
+    "sources": [
+      "https://bashgf.ru/afisha/event/ansambl-russkih-narodnyh-instrumentov-zabava-2/"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0004-4000-8000-000000000004",
+    "title": "Музыку слушаем вместе. Интерактивные занятия для детей от 0 до 3 лет",
+    "category": "концерт",
+    "tags": [
+      "дети",
+      "концерт"
+    ],
+    "date_start": "2026-11-21T11:00:00+05:00",
+    "city": "Уфа",
+    "venue": "Башкирская государственная филармония, Малый (органный) зал",
+    "address": "Уфа, ул. Гоголя, 58",
+    "description": "Интерактивные занятия для детей от 0 до 3 лет. Дата и цена с официальной афиши bashgf.ru.",
+    "price_min": 1500.0,
+    "price_max": 1500.0,
+    "is_free": false,
+    "age_limit": 0,
+    "org_link": "https://ufa.kassir.ru/koncert/bashkirskaya-gosudarstvennaya-filarmoniya/muzyiku-slushaem-vmeste_2026-11-21",
+    "source_url": "https://bashgf.ru/afisha/event/muzyku-slushaem-vmeste-89/",
+    "sources": [
+      "https://bashgf.ru/afisha/event/muzyku-slushaem-vmeste-89/",
+      "https://ufa.kassir.ru/koncert/bashkirskaya-gosudarstvennaya-filarmoniya/muzyiku-slushaem-vmeste_2026-11-21"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0006-4000-8000-000000000006",
+    "title": "Дюймовочка. Сказки Дядюшки Органа",
+    "category": "концерт",
+    "tags": [
+      "дети",
+      "сказка",
+      "концерт"
+    ],
+    "date_start": "2026-11-29T15:00:00+05:00",
+    "city": "Уфа",
+    "venue": "Башкирская государственная филармония, Малый (органный) зал",
+    "address": "Уфа, ул. Гоголя, 58",
+    "description": "Воскресный концерт для всей семьи. Дата и цена с официальной афиши bashgf.ru.",
+    "price_min": 600.0,
+    "price_max": 600.0,
+    "is_free": false,
+    "age_limit": 0,
+    "org_link": "https://ufa.kassir.ru/koncert/bashkirskaya-gosudarstvennaya-filarmoniya/skazki-dyadyushki-organa-dyuymovochka_2026-11-29",
+    "source_url": "https://bashgf.ru/afisha/event/skazki-djadjushki-organa-gadkij-utenok/",
+    "sources": [
+      "https://bashgf.ru/afisha/event/skazki-djadjushki-organa-gadkij-utenok/",
+      "https://ufa.kassir.ru/koncert/bashkirskaya-gosudarstvennaya-filarmoniya/skazki-dyadyushki-organa-dyuymovochka_2026-11-29"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b6f1a001-0012-4000-8000-000000000012",
+    "title": "Маскарад",
+    "category": "спектакль",
+    "tags": [
+      "спектакль"
+    ],
+    "date_start": "2026-11-21T18:00:00+05:00",
+    "date_end": "2026-11-21T20:30:00+05:00",
+    "duration_min": 150,
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр г. Стерлитамак",
+    "address": "Стерлитамак, ул. Худайбердина, 18",
+    "lat": 53.619564,
+    "lon": 55.963428,
+    "description": "Драма в двух действиях с антрактом. Дата, возраст 16+ и цена 1800 ₽ проверены на странице билетов с официальной афиши.",
+    "price_min": 1800.0,
+    "price_max": 1800.0,
+    "is_free": false,
+    "age_limit": 16,
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25368/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25368/",
+      "https://rusdramteatr.ru/repertuar/maskarad"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "be759868-ffff-5a98-a20f-9a1cafe52859",
+    "title": "Дети дома Павлова",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "драма"
+    ],
+    "date_start": "2026-11-16T14:00:00+05:00",
+    "city": "Салават",
+    "venue": "Салаватский государственный башкирский драматический театр",
+    "address": "Салават, ул. 30-летия Победы, 5",
+    "description": "Историко-патриотическая драма А. Белоножкина, 12+. Дата 16 ноября 14:00, возраст 12+ и цена 250 ₽ проверены на странице официальной кассы театра QuickTickets (цена — в dataLayer страницы: price:250; в видимом тексте страницы цены нет).",
+    "price_min": 250.0,
+    "price_max": 250.0,
+    "is_free": false,
+    "age_limit": 12,
+    "org_link": "https://quicktickets.ru/salavat-teatr-dramy/s550",
+    "source_url": "https://quicktickets.ru/salavat-teatr-dramy/s550",
+    "sources": [
+      "https://quicktickets.ru/salavat-teatr-dramy/s550"
+    ],
+    "source_type": "manual",
+    "status": "опубликовано"
+  },
+  {
+    "id": "2b634655-4e20-40ed-8103-c30ea8d35a81",
+    "title": "Спектакль «Палата №6»",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "Чехов",
+      "театр"
+    ],
+    "date_start": "2026-11-23T19:00:00+05:00",
+    "city": "Октябрьский",
+    "venue": "Городской дом культуры",
+    "address": "452614, Республика Башкортостан, г. Октябрьский, ул. Геофизиков, д. 3",
+    "description": "Спектакль театра «Молчи и танцуй» по мотивам повести А. П. Чехова. Перенесён с 30 сентября на 23 ноября 2026 года, купленные билеты действительны на новую дату. Цена билета от 800 до 1500 рублей, возрастное ограничение 16+.",
+    "price_min": 800.0,
+    "price_max": 1500.0,
+    "is_free": false,
+    "age_limit": 16,
+    "source_url": "https://ufa.burocultura.ru/events/palata-6-spektakl-teatr-molchi-i-tantsuy",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "sources": [
+      "https://ufa.burocultura.ru/events/palata-6-spektakl-teatr-molchi-i-tantsuy"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "edc403dd-9b23-478c-b0e2-edb1a6f2d31b",
+    "title": "Айдар и Алмаз Юнусовы",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-11-29T19:00:00+05:00",
+    "city": "Октябрьский",
+    "venue": "Городской дом культуры",
+    "address": "452614, Республика Башкортостан, г. Октябрьский, ул. Геофизиков, д. 3",
+    "description": "Концерт Айдара и Алмаза Юнусовых в Городском доме культуры. Билеты в кассе ГДК, цена 1000 рублей.",
+    "price_min": 1000.0,
+    "price_max": 1000.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://gdk-okt.ru/afisha/2026/10/13946/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "cc25b691-e9c3-44fe-ae54-ee86597a5eaa",
+    "title": "«Новый год на льдине»",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "детям",
+      "новый год"
+    ],
+    "date_start": "2026-12-25T12:00:00+05:00",
+    "date_end": "2026-12-25T12:45:00+05:00",
+    "duration_min": 45,
+    "city": "Октябрьский",
+    "venue": "Городской дом культуры",
+    "address": "452614, Республика Башкортостан, г. Октябрьский, ул. Геофизиков, д. 3",
+    "description": "Новогодний кукольный спектакль для детей и родителей: пингвин Пью отправляется доставить письмо Деду Морозу. Продолжительность 45 минут, возраст зрителей 3-5 лет, новогодние фотозоны. Билеты в кассе ГДК, 500 рублей.",
+    "price_min": 500.0,
+    "price_max": 500.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://gdk-okt.ru/afisha/2026/11/13979/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "56a79f9b-8349-4b60-bf98-37921b04f7ba",
+    "title": "«Звёздные чудеса»",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "детям",
+      "новый год"
+    ],
+    "date_start": "2026-12-25T15:00:00+05:00",
+    "city": "Октябрьский",
+    "venue": "Городской дом культуры",
+    "address": "452614, Республика Башкортостан, г. Октябрьский, ул. Геофизиков, д. 3",
+    "description": "Новогоднее музыкально-танцевальное представление для детей и родителей: звёздные герои распутывают звёздные нити, игры в зале и хоровод с Дедом Морозом. Билеты в кассе ГДК, 850 рублей.",
+    "price_min": 850.0,
+    "price_max": 850.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://gdk-okt.ru/afisha/2026/11/13976/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "db0cc0a5-a11a-4f4a-8983-0a73ec6e96cb",
+    "title": "Музыкальное представление «Щелкунчик»",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "музыка",
+      "рождество"
+    ],
+    "date_start": "2026-11-21T17:00:00+05:00",
+    "city": "Белебей",
+    "venue": "Центральный дворец культуры",
+    "address": "452000, Республика Башкортостан, г. Белебей, ул. им. М. Г. Амирова, 10А",
+    "description": "Красочная постановка Народного коллектива театра эстрадных миниатюр «ПАЯЦ», режиссёр-постановщик Ляйля Воронова. Большой зал Центрального дворца культуры, действует «Пушкинская карта». Возрастное ограничение 6+, цена билета 400 рублей.",
+    "price_min": 400.0,
+    "price_max": 400.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://belebeycdk.ru/afisha/2026/11/18005/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "b41df559-cca7-4f1c-97af-711459b283f7",
+    "title": "Мастер-класс «Секреты и приемы игры на баяне»",
+    "category": "другое",
+    "tags": [
+      "мастер-класс",
+      "музыка",
+      "баян"
+    ],
+    "date_start": "2026-11-16T14:00:00+05:00",
+    "city": "Давлеканово",
+    "venue": "Районный дом культуры",
+    "address": "г. Давлеканово, ул. Красная Площадь, д. 11",
+    "description": "Мастер-класс для желающих освоить баян: упражнения на владение мехом, первые упражнения для левой руки, расположение рядов, басов и аккордов. Программа подбирается индивидуально и для маленьких групп. Цена 250 рублей.",
+    "price_min": 250.0,
+    "price_max": 250.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://rdkdavlekanovo.ru/afisha/master-klass-sekrety-i-priemy-igry-na-bayane/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "c32eb700-159c-4cc6-92f6-60f07d8a554e",
+    "title": "Концерт «Героями не рождаются»",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "память",
+      "патриотический"
+    ],
+    "date_start": "2026-11-20T17:00:00+05:00",
+    "city": "Давлеканово",
+    "venue": "Районный дом культуры",
+    "address": "г. Давлеканово, ул. Красная Площадь, д. 11",
+    "description": "Литературно-музыкальная композиция в память Героя Советского Союза Ивана Евдокимовича Гриба, уроженца Давлекановского района. Патриотические песни, рассказ о биографии и подвиге героя. Цена 300 рублей.",
+    "price_min": 300.0,
+    "price_max": 300.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://rdkdavlekanovo.ru/afisha/kontsert-geroyami-ne-rozhdayutsya/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "5ffc632c-e3ac-4ccc-8a4e-963ef57ebb1b",
+    "title": "Познавательный концерт-лекторий «Льется музыка курая»",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "лекторий",
+      "курай"
+    ],
+    "date_start": "2026-11-21T18:00:00+05:00",
+    "city": "Давлеканово",
+    "venue": "Районный дом культуры",
+    "address": "г. Давлеканово, ул. Красная Площадь, д. 11",
+    "description": "Концерт-лекторий в большом зале районного Дома культуры: народные песни и мелодии. Цена 300 рублей.",
+    "price_min": 300.0,
+    "price_max": 300.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://rdkdavlekanovo.ru/afisha/poznavatelnyj-kontsert-lektorij-letsya-muzyka-kuraya/",
+    "verified_at": "2026-11-14T00:46:13+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "70971771-bcc1-5e7d-b45b-780bced9b4b6",
+    "title": "Концерт Данира Сабирова",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-11-28T19:00:00+05:00",
+    "city": "Дюртюли",
+    "venue": "РДК имени Фидана Гафарова",
+    "address": "452320, Республика Башкортостан, г. Дюртюли, ул. Ленина, д. 7",
+    "description": "Концерт Данира Сабирова в РДК имени Фидана Гафарова, 28 ноября 2026 в 19:00. Цена 1200 рублей. Возраст 6+ указан на постере официальной карточки.",
+    "price_min": 1200.0,
+    "price_max": 1200.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://kdcdurtuli.ru/2026/09/29/konczert-danira-sabirova-4/",
+    "verified_at": "2026-11-14T10:15:54+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "23bb7363-474b-53c8-a486-1e02394f49b9",
+    "title": "Балет Щелкунчик",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "балет",
+      "музыка"
+    ],
+    "date_start": "2026-12-03T19:00:00+05:00",
+    "city": "Дюртюли",
+    "venue": "РДК имени Фидана Гафарова",
+    "address": "452320, Республика Башкортостан, г. Дюртюли, ул. Ленина, д. 7",
+    "description": "Балет Щелкунчик в исполнении студентов Башкирского хореографического колледжа им. Р. Нуреева, 3 декабря 2026 в 19:00. Цена 800-1600 рублей. Возраст 12+ указан на постере официальной карточки.",
+    "price_min": 800.0,
+    "price_max": 1600.0,
+    "is_free": false,
+    "age_limit": 12,
+    "org_link": "https://2-tickets.ru/afisha/event/shhelkunchik-39/",
+    "source_url": "https://2-tickets.ru/afisha/event/shhelkunchik-39/",
+    "verified_at": "2026-11-14T10:15:55+05:00",
+    "sources": [
+      "https://2-tickets.ru/afisha/event/shhelkunchik-39/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "1175e807-1271-590d-8cbd-505cc32e26e3",
+    "title": "Концерт Марата Яруллина",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-12-04T19:00:00+05:00",
+    "city": "Дюртюли",
+    "venue": "РДК имени Фидана Гафарова",
+    "address": "452320, Республика Башкортостан, г. Дюртюли, ул. Ленина, д. 7",
+    "description": "Концерт Марата Яруллина в РДК имени Фидана Гафарова, 4 декабря 2026 в 19:00. Цена 1200 рублей. Возраст 6+ указан на постере официальной карточки.",
+    "price_min": 1200.0,
+    "price_max": 1200.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://kdcdurtuli.ru/2026/10/08/konczert-marata-yarullina-2/",
+    "verified_at": "2026-11-14T10:15:55+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "7399ad1d-7d4d-5efe-8983-08ac84a49662",
+    "title": "Мунча Ташы",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-11-15T19:00:00+05:00",
+    "city": "Янаул",
+    "venue": "Межпоселенческий культурно-досуговый центр",
+    "address": "452800, Республика Башкортостан, г. Янаул, ул. Азина, д. 32",
+    "description": "Эстрада и юмор театр Мунча Ташы в МКДЦ, 15 ноября 2026 в 19:00. Цена 1100 рублей. Возраст 12+ указан на постере официальной карточки.",
+    "price_min": 1100.0,
+    "price_max": 1100.0,
+    "is_free": false,
+    "age_limit": 12,
+    "source_url": "https://mkdc-yanaul.ru/afisha/2026/09/3629/",
+    "verified_at": "2026-11-14T10:15:57+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "374dbf91-a683-5330-89f7-0fb7e8cc04d0",
+    "title": "Концерт Айдара Галимова",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-11-19T19:00:00+05:00",
+    "city": "Янаул",
+    "venue": "Межпоселенческий культурно-досуговый центр",
+    "address": "452800, Республика Башкортостан, г. Янаул, ул. Азина, д. 32",
+    "description": "Концерт Айдара Галимова в МКДЦ, 19 ноября 2026 в 19:00. Цена 1100 рублей. Возраст 6+ указан на постере официальной карточки.",
+    "price_min": 1100.0,
+    "price_max": 1100.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://mkdc-yanaul.ru/afisha/2026/09/3638/",
+    "verified_at": "2026-11-14T10:15:58+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "256f7b04-4c7a-59b8-bf2d-7e144bf1a1d9",
+    "title": "Концерт Данира Сабирова",
+    "category": "концерт",
+    "tags": [
+      "концерт",
+      "музыка"
+    ],
+    "date_start": "2026-12-01T19:00:00+05:00",
+    "city": "Янаул",
+    "venue": "Межпоселенческий культурно-досуговый центр",
+    "address": "452800, Республика Башкортостан, г. Янаул, ул. Азина, д. 32",
+    "description": "Концерт Данира Сабирова в МКДЦ, 1 декабря 2026 в 19:00. Цена 1100 рублей. Возраст 6+ указан на постере официальной карточки.",
+    "price_min": 1100.0,
+    "price_max": 1100.0,
+    "is_free": false,
+    "age_limit": 6,
+    "source_url": "https://mkdc-yanaul.ru/afisha/2026/09/3632/",
+    "verified_at": "2026-11-14T10:15:58+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "1241e142-1e97-5d13-8c38-962845e461b5",
+    "title": "Кабаре-дуэт Новые русские бабки",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "комедия",
+      "юмор"
+    ],
+    "date_start": "2027-02-04T19:00:00+05:00",
+    "city": "Янаул",
+    "venue": "Межпоселенческий культурно-досуговый центр",
+    "address": "452800, Республика Башкортостан, г. Янаул, ул. Азина, д. 32",
+    "description": "Премьера комикссы, кабаре-дуэт Новые русские бабки в МКДЦ, 4 февраля 2027 в 19:00. Цена 1800 рублей. Возраст 16+ указан на постере официальной карточки.",
+    "price_min": 1800.0,
+    "price_max": 1800.0,
+    "is_free": false,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/koncerty-i-shou/3-75234498/",
+    "source_url": "https://sterlitamak.kassy.ru/events/koncerty-i-shou/3-75234498/",
+    "verified_at": "2026-11-14T10:15:59+05:00",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/koncerty-i-shou/3-75234498/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "1a1add89-6f0a-5d62-bfba-1aaa2d9dd58a",
+    "title": "Новогоднее театрализованное представление Волк и семеро козлят на новый лад",
+    "category": "спектакль",
+    "tags": [
+      "спектакль",
+      "детям",
+      "новый год"
+    ],
+    "date_start": "2026-12-25T19:00:00+05:00",
+    "city": "Янаул",
+    "venue": "Межпоселенческий культурно-досуговый центр",
+    "address": "452800, Республика Башкортостан, г. Янаул, ул. Азина, д. 32",
+    "description": "Новогоднее театрализованное представление Волк и семеро козлят на новый лад в МКДЦ, 25 декабря 2026 в 19:00. Цена 400 рублей, детям до 3 лет бесплатно. Возраст 0+ указан на постере официальной карточки; время 19:00 указано на карточке и на постере.",
+    "price_min": 400.0,
+    "price_max": 400.0,
+    "is_free": false,
+    "age_limit": 0,
+    "source_url": "https://mkdc-yanaul.ru/afisha/2026/11/3736/",
+    "verified_at": "2026-11-14T10:17:29+05:00",
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "53abf34a-fe79-5728-9ac7-1a32e303184a",
+    "title": "Муха-Цокотуха",
+    "category": "спектакль",
+    "date_start": "2026-11-22T12:00:00+05:00",
+    "date_end": "2026-11-22T13:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Детская музыкальная сказка о приключениях Мухи и её друзей.",
+    "price_min": 350,
+    "price_max": 550,
+    "age_limit": 0,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25369/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25369/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25369/",
+      "https://rusdramteatr.ru/repertuar/detskij-repertuar/mukha-tsokotukha"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "id": "56100135-868a-58ff-a4ab-2b30c3e4b99c",
+    "title": "Летучий корабль",
+    "category": "спектакль",
+    "date_start": "2026-11-29T12:00:00+05:00",
+    "date_end": "2026-11-29T13:10:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Семейная музыкальная сказка по мотивам знакомого мультфильма.",
+    "price_min": 450,
+    "price_max": 550,
+    "age_limit": 0,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25372/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25372/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25372/",
+      "https://rusdramteatr.ru/repertuar/detskij-repertuar/letuchij-korabl"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Царевна-лягушка",
+    "category": "спектакль",
+    "date_start": "2026-11-15T12:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Семейный спектакль по мотивам русских народных сказок.",
+    "price_min": 350,
+    "price_max": 600,
+    "age_limit": 0,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25366/",
+    "source_url": "https://rusdramteatr.ru/afisha/tsarevna-lyagushka-15-11-2026",
+    "sources": [
+      "https://rusdramteatr.ru/afisha/tsarevna-lyagushka-15-11-2026",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25366/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Ужин с дураком",
+    "category": "спектакль",
+    "date_start": "2026-11-15T18:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Комедия о званом ужине, который пошёл не по плану.",
+    "price_min": 500,
+    "price_max": 1200,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25367/",
+    "source_url": "https://rusdramteatr.ru/afisha/uzhin-s-durakom-15-11-2026",
+    "sources": [
+      "https://rusdramteatr.ru/afisha/uzhin-s-durakom-15-11-2026",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25367/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Горгоны",
+    "category": "спектакль",
+    "date_start": "2026-11-17T19:00:00+05:00",
+    "city": "Мелеуз",
+    "venue": "Мелеузовский городской дворец культуры",
+    "address": "ул. Ленина, 123",
+    "description": "Гастрольный показ комедии о двух соперничающих актрисах.",
+    "price_min": 450,
+    "price_max": 700,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25357/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25357/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25357/",
+      "https://rusdramteatr.ru/repertuar/gorgony"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Гроза",
+    "category": "спектакль",
+    "date_start": "2026-11-18T19:00:00+05:00",
+    "city": "Кумертау",
+    "venue": "Дворец культуры «Угольщиков»",
+    "address": "ул. 40 лет Победы, 1",
+    "description": "Гастрольный показ по пьесе Александра Островского.",
+    "price_min": 400,
+    "price_max": 1000,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25488/",
+    "source_url": "https://ktokumertau.ru/2026/11/02/groza-projdyot-na-sczene-dk-ugolshhikov/",
+    "sources": [
+      "https://ktokumertau.ru/2026/11/02/groza-projdyot-na-sczene-dk-ugolshhikov/",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25488/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Руслан и Людмила",
+    "category": "спектакль",
+    "date_start": "2026-11-22T18:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Семейный спектакль по поэме Александра Пушкина.",
+    "price_min": 500,
+    "price_max": 1000,
+    "age_limit": 6,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25370/",
+    "source_url": "https://rusdramteatr.ru/afisha/ruslan-i-lyudmila-22-11-2026",
+    "sources": [
+      "https://rusdramteatr.ru/afisha/ruslan-i-lyudmila-22-11-2026",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25370/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Кошкин дом",
+    "category": "спектакль",
+    "date_start": "2026-12-06T12:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Детская музыкальная сказка о кошке и её друзьях.",
+    "price_min": 350,
+    "price_max": 600,
+    "age_limit": 0,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25521/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25521/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25521/",
+      "https://rusdramteatr.ru/repertuar/detskij-repertuar/koshkin-dom"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Горгоны",
+    "category": "спектакль",
+    "date_start": "2026-12-06T18:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Комедия о двух соперничающих актрисах.",
+    "price_min": 500,
+    "price_max": 1200,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25522/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25522/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25522/",
+      "https://rusdramteatr.ru/repertuar/gorgony"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Гроза",
+    "category": "спектакль",
+    "date_start": "2026-12-10T19:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Спектакль по пьесе Александра Островского.",
+    "price_min": 500,
+    "price_max": 1500,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25523/",
+    "source_url": "https://sterlitamak.kassy.ru/events/teatr/2-25523/",
+    "sources": [
+      "https://sterlitamak.kassy.ru/events/teatr/2-25523/",
+      "https://rusdramteatr.ru/repertuar/groza"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Лето человеческое",
+    "category": "спектакль",
+    "date_start": "2026-12-11T19:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Драма о любви к близким и поиске смысла жизни.",
+    "price_min": 800,
+    "price_max": 1200,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25524/",
+    "source_url": "https://rusdramteatr.ru/afisha/leto-chelovecheskoe-11-12-2026",
+    "sources": [
+      "https://rusdramteatr.ru/afisha/leto-chelovecheskoe-11-12-2026",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25524/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  },
+  {
+    "title": "Маскарад",
+    "category": "спектакль",
+    "date_start": "2026-12-12T18:00:00+05:00",
+    "city": "Стерлитамак",
+    "venue": "Государственный русский драматический театр",
+    "address": "Ул. Худайбердина, 18",
+    "description": "Спектакль по драме Михаила Лермонтова.",
+    "price_min": 600,
+    "price_max": 1800,
+    "age_limit": 16,
+    "org_link": "https://sterlitamak.kassy.ru/events/teatr/2-25525/",
+    "source_url": "https://rusdramteatr.ru/afisha/maskarad-12-12-2026",
+    "sources": [
+      "https://rusdramteatr.ru/afisha/maskarad-12-12-2026",
+      "https://sterlitamak.kassy.ru/events/teatr/2-25525/"
+    ],
+    "source_type": "page",
+    "status": "опубликовано"
+  }
+]
