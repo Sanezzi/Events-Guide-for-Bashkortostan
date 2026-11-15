@@ -73,3 +73,18 @@ async def collect(urls, *, preview=False):
         if database is not None:
             await database.close()
     return int(failed)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("urls", nargs="*", help="Organizer event or listing URLs")
+    parser.add_argument("--configured", action="store_true", help="Read URLs from contour/data/sources.json")
+    parser.add_argument("--preview", action="store_true", help="Scan sources without importing")
+    args = parser.parse_args()
+    if args.configured:
+        registry = Path(__file__).with_name("data") / "sources.json"
+        sources = json.loads(registry.read_text(encoding="utf-8"))
+        args.urls.extend(item["url"] for item in sources if item.get("url"))
+    if not args.urls:
+        parser.error("supply at least one URL or use --configured")
+    raise SystemExit(asyncio.run(collect(args.urls, preview=args.preview)))
