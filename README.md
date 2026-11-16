@@ -77,6 +77,12 @@
 
 **Основной модуль** — `contour/`. **Технические направления** — Data Engineering, ETL Pipelines, Web Scraping, Data Validation, Data Normalization, Deduplication, Database Management.
 
+### 6. Technical Advisor
+
+**Технический консультант проекта** · [Даниил Сергеевич Голощапов / miradlimir-a11y](https://github.com/miradlimir-a11y)
+
+- Предлагал улучшения функциональности и консультировал команду по их реализации
+
 ### Архитектура взаимодействия команды
 
 Инженер данных обеспечивает поступление и качество информации. Full-Stack Developer предоставляет доступ к каталогу через сайт и API. Telegram Bot Developer подключает к каталогу бота. AI/LLM Engineer отвечает за поиск и рекомендации по проверенным данным. Tech Lead согласует интерфейсы и интегрирует компоненты.
