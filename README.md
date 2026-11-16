@@ -99,7 +99,7 @@
 2. Скачайте ZIP через **Code → Download ZIP** и распакуйте его или клонируйте репозиторий.
 
    ```sh
-   git clone https://github.com/Sanezzi/-ultural-Events-Guide-for-Bashkortostan.git afisha
+   git clone https://github.com/Sanezzi/Events-Guide-for-Bashkortostan.git afisha
    cd afisha
    ```
 
